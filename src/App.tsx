@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { WatchlistProvider } from "@/contexts/WatchlistContext";
 import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-react";
+import { dark } from "@clerk/themes";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
@@ -48,8 +49,32 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// Custom appearance for Clerk
+const clerkAppearance = {
+  baseTheme: dark,
+  elements: {
+    formButtonPrimary: "bg-flixhive-accent hover:bg-flixhive-accent/90 text-white",
+    card: "bg-flixhive-dark border border-flixhive-gray/30",
+    headerTitle: "text-white",
+    headerSubtitle: "text-white/70",
+    socialButtonsIconButton: "bg-flixhive-gray/50 border border-flixhive-gray/30 hover:bg-flixhive-gray",
+    formFieldInput: "bg-flixhive-gray/50 border-flixhive-gray/30 text-white",
+    formFieldLabel: "text-white/80",
+    footerActionLink: "text-flixhive-accent hover:text-flixhive-accent/90",
+    identityPreviewEditButton: "text-flixhive-accent",
+    userButtonPopoverCard: "bg-flixhive-dark border border-flixhive-gray/30",
+    userButtonPopoverActionButton: "hover:bg-flixhive-gray/50",
+    userButtonPopoverActionButtonIcon: "text-white/70",
+    userButtonPopoverActionButtonText: "text-white"
+  }
+};
+
 const App = () => (
-  <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} clerkJSVersion="5.56.0-snapshot.v20250312225817">
+  <ClerkProvider 
+    publishableKey={CLERK_PUBLISHABLE_KEY} 
+    clerkJSVersion="5.56.0-snapshot.v20250312225817"
+    appearance={clerkAppearance}
+  >
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WatchlistProvider>
