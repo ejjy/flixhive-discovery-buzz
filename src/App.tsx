@@ -22,8 +22,11 @@ import Profile from "./pages/Profile";
 import AdminPanel from "./pages/AdminPanel";
 
 // Your Clerk publishable key
-// Replace this with your actual Clerk publishable key from your Clerk dashboard
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_REPLACE_WITH_ACTUAL_KEY";
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!CLERK_PUBLISHABLE_KEY) {
+  console.error("Missing VITE_CLERK_PUBLISHABLE_KEY environment variable");
+}
 
 const queryClient = new QueryClient();
 
@@ -74,6 +77,36 @@ const App = () => (
     publishableKey={CLERK_PUBLISHABLE_KEY} 
     clerkJSVersion="5.56.0-snapshot.v20250312225817"
     appearance={clerkAppearance}
+    localization={{
+      signIn: {
+        start: {
+          title: "Sign in to FlixHive",
+          subtitle: "to continue to FlixHive"
+        },
+        password: {
+          title: "Enter your password",
+          subtitle: "to continue to FlixHive"
+        },
+        emailCode: {
+          title: "Check your email",
+          subtitle: "to continue to FlixHive"
+        }
+      },
+      signUp: {
+        start: {
+          title: "Create your account",
+          subtitle: "to get started with FlixHive"
+        },
+        emailLink: {
+          title: "Verify your email",
+          subtitle: "to continue to FlixHive"
+        },
+        password: {
+          title: "Create a password",
+          subtitle: "to secure your account"
+        }
+      }
+    }}
   >
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

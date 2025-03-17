@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu, X, Film, Heart, User, Home, TrendingUp, Info, MessageSquare, Settings, Shield } from 'lucide-react';
+import { Search, Menu, X, Film, Heart, User, Home, TrendingUp, Info, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
@@ -107,7 +107,7 @@ const Navbar = () => {
             />
           </SignedIn>
           <SignedOut>
-            <SignInButton mode="modal">
+            <SignInButton mode="modal" afterSignInUrl="/dashboard">
               <Button className="bg-flixhive-accent hover:bg-flixhive-accent/90">
                 Sign In
               </Button>
@@ -128,7 +128,7 @@ const Navbar = () => {
             />
           </SignedIn>
           <SignedOut>
-            <SignInButton mode="modal">
+            <SignInButton mode="modal" afterSignInUrl="/dashboard">
               <Button size="sm" className="bg-flixhive-accent hover:bg-flixhive-accent/90">
                 Sign In
               </Button>
