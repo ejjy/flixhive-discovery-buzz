@@ -3,15 +3,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Film } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { SignInButton, SignUpButton, useAuth } from '@clerk/clerk-react';
-import { Navigate } from 'react-router-dom';
+// import { SignInButton, SignUpButton, useAuth } from '@clerk/clerk-react';
+// import { Navigate } from 'react-router-dom';
 
 const Landing = () => {
-  const { isSignedIn } = useAuth();
+  // const { isSignedIn } = useAuth();
 
-  if (isSignedIn) {
-    return <Navigate to="/home" replace />;
-  }
+  // if (isSignedIn) {
+  //   return <Navigate to="/home" replace />;
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-flixhive-dark to-background flex flex-col">
@@ -33,17 +33,17 @@ const Landing = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4">
-          <SignUpButton mode="modal">
+          <Link to="/home">
             <Button size="lg" className="bg-flixhive-accent hover:bg-flixhive-accent/90">
               Get Started
             </Button>
-          </SignUpButton>
+          </Link>
           
-          <SignInButton mode="modal">
+          <Link to="/home">
             <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/5">
               Sign In
             </Button>
-          </SignInButton>
+          </Link>
         </div>
       </div>
       
