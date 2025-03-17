@@ -363,9 +363,15 @@ export const getMovieReviews = async (movieId: number): Promise<Review[]> => {
   });
 };
 
-export const getAIReview = async (movieId: number): Promise<AIReview | undefined> => {
+export const getAIReview = async (movieId: number, forceRefresh = false): Promise<AIReview | undefined> => {
+  // If refresh is forced, always generate a new review
+  if (forceRefresh) {
+    console.log(`Force refreshing AI review for movie ID: ${movieId}`);
+    return generateAIReview(movieId);
+  }
+  
   // For existing movies in our mock database, return the pre-defined review
-  if (mockAIReviews[movieId]) {
+  if (mockAIReviews[movieId] && !forceRefresh) {
     return new Promise((resolve) => {
       setTimeout(() => resolve(mockAIReviews[movieId]), 1000);
     });
@@ -400,16 +406,15 @@ export const generateAIReview = async (movieId: number): Promise<AIReview> => {
     } catch (aiError) {
       console.error(`Error generating AI review for "${movie.title}":`, aiError);
       
-      // If OpenAI API fails or API key is not set, fall back to the simulated review
-      const errorMessage = (aiError as Error).message;
-      if (errorMessage.includes("API key not configured") || 
-          errorMessage.includes("API error") ||
-          errorMessage.includes("Failed to parse")) {
-        console.log("Falling back to simulated review for:", movie.title);
-        return generateSimulatedReview(movie);
-      }
-      
-      throw aiError;
+      // Return a fallback review that indicates there was an issue
+      return {
+        summary: `We couldn't generate a complete AI review for ${movie.title} at this time.`,
+        pros: ["The film has received attention from critics and audiences"],
+        cons: ["Limited information is available for a complete analysis"],
+        watchRecommendation: "Consider checking critic and user reviews before watching",
+        error: true,
+        errorMessage: (aiError as Error).message
+      };
     }
   } catch (error) {
     console.error("Error in generateAIReview:", error);
@@ -418,7 +423,9 @@ export const generateAIReview = async (movieId: number): Promise<AIReview> => {
       summary: "We couldn't generate a complete AI review for this movie at this time.",
       pros: ["The film has received attention from critics and audiences"],
       cons: ["Limited information is available for a complete analysis"],
-      watchRecommendation: "Consider checking critic and user reviews before watching"
+      watchRecommendation: "Consider checking critic and user reviews before watching",
+      error: true,
+      errorMessage: error instanceof Error ? error.message : "Unknown error"
     };
   }
 };

@@ -40,4 +40,6 @@ export interface AIReview {
   cons: string[];
   watchRecommendation: string;
   ottPopularity?: OTTPlatformPopularity[];
+  error?: boolean;
+  errorMessage?: string;
 }

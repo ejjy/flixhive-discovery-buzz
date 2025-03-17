@@ -5,7 +5,8 @@ import { getAIReview } from '@/services/movieService';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Check, X, BookOpen, Star, Film, MessageSquare, Loader2, AlertTriangle, Globe } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Check, X, BookOpen, Star, Film, MessageSquare, Loader2, AlertTriangle, Globe, RefreshCw } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 interface AIReviewSectionProps {
@@ -18,61 +19,80 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
   const [aiReview, setAiReview] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isMockReview, setIsMockReview] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
-  useEffect(() => {
-    const fetchAIReview = async () => {
-      setIsLoading(true);
-      setIsGenerating(false);
-      setIsMockReview(false);
-      
-      try {
-        // Check if it's a newly discovered movie (ID > 1000)
-        if (movie.id > 1000) {
-          setIsGenerating(true);
-          toast({
-            title: "Generating AI Review",
-            description: `Creating a fresh review for "${movie.title}" using data from Wikipedia, IMDb, and Rotten Tomatoes...`,
-            duration: 5000,
-          });
-        }
-        
-        const reviewData = await getAIReview(movie.id);
-        setAiReview(reviewData);
-        
-        // Check if this is a mock review
-        if (reviewData.summary.includes("mock review") || reviewData.summary.includes("API key is not configured")) {
-          setIsMockReview(true);
-          toast({
-            title: "API Key Missing",
-            description: "Using mock review data. Add OpenAI API key in Netlify for real AI reviews.",
-            variant: "destructive",
-            duration: 5000,
-          });
-        } else if (movie.id > 1000) {
-          toast({
-            title: "AI Review Ready",
-            description: `We've created a detailed review for "${movie.title}" based on data from multiple sources`,
-            duration: 3000,
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching AI review:', error);
+  const fetchAIReview = async (forceRefresh = false) => {
+    setIsLoading(true);
+    setIsGenerating(movie.id > 1000 || forceRefresh);
+    setIsMockReview(false);
+    setHasError(false);
+    
+    try {
+      // Check if it's a newly discovered movie (ID > 1000) or forced refresh
+      if (movie.id > 1000 || forceRefresh) {
+        setIsGenerating(true);
         toast({
-          title: "Error",
-          description: "Couldn't generate an AI review at this time",
+          title: "Generating AI Review",
+          description: `Creating a fresh review for "${movie.title}" using data from Wikipedia, IMDb, and Rotten Tomatoes...`,
+          duration: 5000,
+        });
+      }
+      
+      const reviewData = await getAIReview(movie.id, forceRefresh);
+      setAiReview(reviewData);
+      
+      // Check if this is a mock review
+      if (reviewData.summary && (
+          reviewData.summary.includes("mock review") || 
+          reviewData.summary.includes("API key is not configured") ||
+          reviewData.summary.includes("API key not set")
+        )) {
+        setIsMockReview(true);
+        toast({
+          title: "API Key Missing",
+          description: "Using mock review data. Add OpenAI API key in Netlify for real AI reviews.",
           variant: "destructive",
+          duration: 5000,
+        });
+      } else if (reviewData.summary && reviewData.summary.includes("couldn't generate")) {
+        setHasError(true);
+        toast({
+          title: "Review Generation Issue",
+          description: "We couldn't generate a complete review. You can try refreshing.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      } else if (movie.id > 1000 || forceRefresh) {
+        toast({
+          title: "AI Review Ready",
+          description: `We've created a detailed review for "${movie.title}" based on data from multiple sources`,
           duration: 3000,
         });
-      } finally {
-        setIsLoading(false);
-        setIsGenerating(false);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching AI review:', error);
+      setHasError(true);
+      toast({
+        title: "Error",
+        description: "Couldn't generate an AI review at this time",
+        variant: "destructive",
+        duration: 3000,
+      });
+    } finally {
+      setIsLoading(false);
+      setIsGenerating(false);
+    }
+  };
 
+  useEffect(() => {
     if (movie) {
       fetchAIReview();
     }
-  }, [movie, toast]);
+  }, [movie]);
+
+  const handleRefresh = () => {
+    fetchAIReview(true);
+  };
 
   if (isLoading) {
     return (
@@ -93,7 +113,10 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
         <div className="text-center py-8">
           <MessageSquare className="h-16 w-16 mx-auto mb-4 text-flixhive-accent opacity-50" />
           <h3 className="text-2xl font-semibold mb-2">No AI Review Available</h3>
-          <p className="text-white/60">We couldn't find an AI-generated review for this movie.</p>
+          <p className="text-white/60 mb-6">We couldn't find an AI-generated review for this movie.</p>
+          <Button onClick={handleRefresh} className="bg-flixhive-accent hover:bg-flixhive-accent/90">
+            <RefreshCw className="mr-2 h-4 w-4" /> Generate Review
+          </Button>
         </div>
       </Card>
     );
@@ -115,6 +138,23 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
             <AlertTriangle className="h-4 w-4" />
             <span className="text-sm">Mock Review (API key not set)</span>
           </div>
+        )}
+        {hasError && (
+          <div className="ml-auto flex items-center gap-2 text-red-500">
+            <AlertTriangle className="h-4 w-4" />
+            <span className="text-sm">Review Generation Issue</span>
+          </div>
+        )}
+        {!isGenerating && (
+          <Button 
+            onClick={handleRefresh} 
+            variant="outline" 
+            size="sm" 
+            className="ml-auto"
+            disabled={isGenerating}
+          >
+            <RefreshCw className="h-4 w-4 mr-1" /> Refresh
+          </Button>
         )}
       </div>
 
@@ -138,7 +178,7 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
                 ))}
               </div>
               <p className="text-white/80">{aiReview.summary}</p>
-              {!isMockReview && (
+              {!isMockReview && !hasError && (
                 <div className="flex items-center mt-2 text-xs text-flixhive-accent">
                   <Globe className="h-3 w-3 mr-1" />
                   <span>Review based on data from Wikipedia, IMDb, and Rotten Tomatoes</span>
@@ -154,7 +194,7 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
                 Pros
               </h4>
               <ul className="space-y-2">
-                {aiReview.pros.map((pro: string, index: number) => (
+                {aiReview.pros && aiReview.pros.map((pro: string, index: number) => (
                   <li key={index} className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-green-500 mt-1 shrink-0" />
                     <span className="text-white/80">{pro}</span>
@@ -169,7 +209,7 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
                 Cons
               </h4>
               <ul className="space-y-2">
-                {aiReview.cons.map((con: string, index: number) => (
+                {aiReview.cons && aiReview.cons.map((con: string, index: number) => (
                   <li key={index} className="flex items-start gap-2">
                     <X className="h-4 w-4 text-red-500 mt-1 shrink-0" />
                     <span className="text-white/80">{con}</span>
@@ -191,6 +231,8 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
             <BookOpen className="h-3 w-3" />
             {isMockReview ? (
               <span>This is a mock review. Configure OpenAI API key in Netlify for real AI reviews.</span>
+            ) : hasError ? (
+              <span>Generated with limited information. Try refreshing for a better review.</span>
             ) : movie.id > 1000 ? (
               <span>AI-generated review created by analyzing online sources for this movie</span>
             ) : (
