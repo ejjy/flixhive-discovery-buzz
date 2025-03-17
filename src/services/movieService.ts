@@ -286,10 +286,11 @@ export const generateAIReview = async (movieId: number): Promise<AIReview> => {
     const movie = await getMovieById(movieId);
     
     if (!movie) {
+      console.error("Movie not found for ID:", movieId);
       throw new Error("Movie not found");
     }
     
-    console.log(`Generating AI review for: ${movie.title}`);
+    console.log(`Generating AI review for: ${movie.title} (ID: ${movieId})`);
     
     try {
       // Call the OpenAI API to generate a review
@@ -299,21 +300,24 @@ export const generateAIReview = async (movieId: number): Promise<AIReview> => {
         movie.genres
       );
       
-      console.log("Generated AI review:", aiReviewContent);
+      console.log("Successfully generated AI review for:", movie.title);
       return aiReviewContent;
     } catch (aiError) {
-      console.error("Error calling OpenAI API:", aiError);
+      console.error(`Error generating AI review for "${movie.title}":`, aiError);
       
       // If OpenAI API fails or API key is not set, fall back to the simulated review
-      if ((aiError as Error).message.includes("API key not configured")) {
-        console.log("API key not configured, falling back to simulated review");
+      const errorMessage = (aiError as Error).message;
+      if (errorMessage.includes("API key not configured") || 
+          errorMessage.includes("API error") ||
+          errorMessage.includes("Failed to parse")) {
+        console.log("Falling back to simulated review for:", movie.title);
         return generateSimulatedReview(movie);
       }
       
       throw aiError;
     }
   } catch (error) {
-    console.error("Error generating AI review:", error);
+    console.error("Error in generateAIReview:", error);
     // Return a fallback review if something goes wrong
     return {
       summary: "We couldn't generate a complete AI review for this movie at this time.",

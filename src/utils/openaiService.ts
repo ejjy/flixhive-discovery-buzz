@@ -56,7 +56,7 @@ Write a review in this specific JSON format:
 Return ONLY the JSON with no additional text or explanation.
 `;
 
-    console.log("Sending request to OpenAI API...");
+    console.log("Sending request to OpenAI API for movie:", movieTitle);
     
     // Create a dynamic object for headers to avoid the key being included directly in the build
     const headers: Record<string, string> = {
@@ -91,11 +91,27 @@ Return ONLY the JSON with no additional text or explanation.
     }
 
     const data = await response.json();
+    console.log("OpenAI API response received:", data);
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error("Unexpected API response format:", data);
+      throw new Error("Unexpected API response format");
+    }
+    
     const aiReviewText = data.choices[0].message.content.trim();
     
     // Parse the JSON response
     try {
+      console.log("Attempting to parse AI response:", aiReviewText);
       const parsedReview = JSON.parse(aiReviewText);
+      
+      // Validate that the parsed review has the expected structure
+      if (!parsedReview.summary || !Array.isArray(parsedReview.pros) || 
+          !Array.isArray(parsedReview.cons) || !parsedReview.watchRecommendation) {
+        console.error("AI response missing required fields:", parsedReview);
+        throw new Error("AI response missing required fields");
+      }
+      
       return {
         summary: parsedReview.summary,
         pros: parsedReview.pros,
