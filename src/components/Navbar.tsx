@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Menu, X, Film, Heart, User, Home, TrendingUp, Info, MessageSquare } from 'lucide-react';
@@ -107,7 +106,7 @@ const Navbar = () => {
             />
           </SignedIn>
           <SignedOut>
-            <SignInButton mode="modal" redirectUrl="/dashboard">
+            <SignInButton mode="modal">
               <Button className="bg-flixhive-accent hover:bg-flixhive-accent/90">
                 Sign In
               </Button>
@@ -128,7 +127,7 @@ const Navbar = () => {
             />
           </SignedIn>
           <SignedOut>
-            <SignInButton mode="modal" redirectUrl="/dashboard">
+            <SignInButton mode="modal">
               <Button size="sm" className="bg-flixhive-accent hover:bg-flixhive-accent/90">
                 Sign In
               </Button>

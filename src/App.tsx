@@ -77,6 +77,11 @@ const App = () => (
     publishableKey={CLERK_PUBLISHABLE_KEY} 
     clerkJSVersion="5.56.0-snapshot.v20250312225817"
     appearance={clerkAppearance}
+    signInUrl="/sign-in"
+    signUpUrl="/sign-up"
+    afterSignInUrl="/dashboard"
+    afterSignUpUrl="/dashboard"
+    afterSignOutUrl="/"
     localization={{
       signIn: {
         start: {
