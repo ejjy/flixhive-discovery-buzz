@@ -6,6 +6,12 @@ export interface AIReviewContent {
   pros: string[];
   cons: string[];
   watchRecommendation: string;
+  ottPopularity?: {
+    platform: string;
+    rank?: number;
+    trending?: boolean;
+    note?: string;
+  }[];
 }
 
 // Check if the API key is configured
@@ -35,27 +41,44 @@ export async function generateMovieReviewWithAI(
         "Content is generic and not specific to the movie",
         "You're missing out on customized AI insights"
       ],
-      watchRecommendation: "To get a real recommendation, please configure your OpenAI API key in the Netlify environment variables."
+      watchRecommendation: "To get a real recommendation, please configure your OpenAI API key in the Netlify environment variables.",
+      ottPopularity: [
+        {
+          platform: "Mock Platform",
+          trending: true,
+          note: "This is mock OTT popularity data (API key not configured)"
+        }
+      ]
     };
   }
 
   try {
     const promptContent = `
-You are a film critic with deep knowledge of cinema, with access to search online for information from Wikipedia, Rotten Tomatoes, and IMDb.
+You are a film critic with deep knowledge of cinema, with access to search online for information from Wikipedia, Rotten Tomatoes, IMDb, and OTT platforms like Netflix, Amazon Prime, Disney+, HBO Max, Hulu.
 
 For the movie "${movieTitle}" (genres: ${genres.join(', ')}), described as: "${movieOverview}"
-1. First search for information about this movie on Wikipedia, Rotten Tomatoes, and IMDb
-2. Use that information to formulate a comprehensive, well-informed review
-3. Consider critic scores, audience reception, box office performance, and critical consensus if available
-4. If it's a classic or older film, consider its historical significance and legacy
-5. If it's a newer film, consider how it compares to similar recent films
+1. First search for information about this movie on Wikipedia, Rotten Tomatoes, IMDb, and major streaming platforms
+2. Analyze which OTT platforms currently feature this movie and how popular/trending it is on each
+3. Use that information to formulate a comprehensive, well-informed review
+4. Consider critic scores, audience reception, box office performance, and critical consensus if available
+5. If it's a classic or older film, consider its historical significance and legacy
+6. If it's a newer film, consider how it compares to similar recent films
+7. Pay special attention to the movie's popularity and trending status on major streaming platforms
 
 Write a review in this specific JSON format:
 {
   "summary": "A concise overview of the movie's strengths, weaknesses, and overall impression, mentioning where data was sourced from (1-2 sentences)",
   "pros": ["List 4 positive aspects of the movie based on critical consensus and audience reception"],
   "cons": ["List 3 negative aspects or potential drawbacks of the movie based on critical consensus"],
-  "watchRecommendation": "A conclusion sentence about who would enjoy this movie and whether it's worth watching, citing its Rotten Tomatoes or IMDb score if available"
+  "watchRecommendation": "A conclusion sentence about who would enjoy this movie and whether it's worth watching, citing its Rotten Tomatoes or IMDb score if available",
+  "ottPopularity": [
+    {
+      "platform": "Name of streaming platform where it's available (e.g., Netflix, Disney+)",
+      "rank": Optional number indicating its rank in popularity if available (e.g., #5 in Top 10),
+      "trending": true/false indicating if it's trending on this platform,
+      "note": "A brief note about its popularity status on this platform (e.g., 'Currently in Netflix Top 10 Movies')"
+    }
+  ]
 }
 
 Return ONLY the JSON with no additional text or explanation.
@@ -121,7 +144,8 @@ Return ONLY the JSON with no additional text or explanation.
         summary: parsedReview.summary,
         pros: parsedReview.pros,
         cons: parsedReview.cons,
-        watchRecommendation: parsedReview.watchRecommendation
+        watchRecommendation: parsedReview.watchRecommendation,
+        ottPopularity: parsedReview.ottPopularity || []
       };
     } catch (parseError) {
       console.error("Error parsing AI response:", parseError);

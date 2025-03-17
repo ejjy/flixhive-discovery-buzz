@@ -27,9 +27,17 @@ export interface Review {
   createdAt: string;
 }
 
+export interface OTTPlatformPopularity {
+  platform: string;
+  rank?: number;
+  trending?: boolean;
+  note?: string;
+}
+
 export interface AIReview {
   summary: string;
   pros: string[];
   cons: string[];
   watchRecommendation: string;
+  ottPopularity?: OTTPlatformPopularity[];
 }

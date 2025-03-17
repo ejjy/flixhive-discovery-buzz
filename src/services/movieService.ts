@@ -95,7 +95,7 @@ const mockMovies: Movie[] = [
     platformRatings: [
       { platform: "IMDb", score: 7.8, outOf: 10 },
       { platform: "Rotten Tomatoes", score: 94, outOf: 100 },
-      { platform: "Metacritic", score: 81, outOf: 100 }
+      { platform: "Metacritic", score: 81, OutOf: 100 }
     ]
   },
   {
@@ -148,7 +148,7 @@ const mockReviews: { [key: number]: Review[] } = {
   ]
 };
 
-// Mock AI reviews
+// Mock AI reviews with OTT popularity data
 const mockAIReviews: { [key: number]: AIReview } = {
   1: {
     summary: "Dune: Part Two is a visually stunning and emotionally profound continuation of the epic saga, with expanded roles for previously underutilized characters and breathtaking desert action sequences.",
@@ -162,7 +162,20 @@ const mockAIReviews: { [key: number]: AIReview } = {
       "Some viewers might find the 166-minute runtime challenging",
       "Complex political elements may confuse those unfamiliar with the source material"
     ],
-    watchRecommendation: "Must-watch for sci-fi fans and anyone who enjoyed the first part"
+    watchRecommendation: "Must-watch for sci-fi fans and anyone who enjoyed the first part",
+    ottPopularity: [
+      {
+        platform: "HBO Max",
+        rank: 1,
+        trending: true,
+        note: "Currently #1 trending movie on HBO Max"
+      },
+      {
+        platform: "Prime Video",
+        trending: true,
+        note: "Among top 5 most watched movies this week"
+      }
+    ]
   },
   2: {
     summary: "Oppenheimer is a technical masterpiece and historical epic, with Christopher Nolan delivering a nuanced character study anchored by Cillian Murphy's remarkable performance as the conflicted father of the atomic bomb.",
@@ -176,7 +189,20 @@ const mockAIReviews: { [key: number]: AIReview } = {
       "The three-hour runtime may be demanding for some viewers",
       "Non-linear narrative style can be occasionally challenging to follow"
     ],
-    watchRecommendation: "Essential viewing for history buffs and cinephiles seeking thought-provoking entertainment"
+    watchRecommendation: "Essential viewing for history buffs and cinephiles seeking thought-provoking entertainment",
+    ottPopularity: [
+      {
+        platform: "Netflix",
+        rank: 3,
+        trending: true,
+        note: "Currently in Netflix Top 10 Movies"
+      },
+      {
+        platform: "Prime Video",
+        trending: false,
+        note: "Recently added to the platform"
+      }
+    ]
   },
   3: {
     summary: "Poor Things is a bizarre, beautiful, and bold reimagining of the Frankenstein story, with Emma Stone delivering a fearless performance in Yorgos Lanthimos's visually spectacular and thematically rich world.",
@@ -190,7 +216,20 @@ const mockAIReviews: { [key: number]: AIReview } = {
       "The film's explicit content and oddity may alienate some viewers",
       "The unconventional pacing takes some adjustment"
     ],
-    watchRecommendation: "A must-see for fans of bold, artistic cinema willing to embrace the unusual"
+    watchRecommendation: "A must-see for fans of bold, artistic cinema willing to embrace the unusual",
+    ottPopularity: [
+      {
+        platform: "Hulu",
+        trending: true,
+        note: "Currently trending on Hulu"
+      },
+      {
+        platform: "Disney+",
+        rank: 7,
+        trending: true,
+        note: "Recently added to Disney+ with strong viewer numbers"
+      }
+    ]
   },
   4: {
     summary: "The Batman reinvents the Dark Knight with a noir-detective approach, showcasing Robert Pattinson's intense portrayal in a rain-soaked, atmospheric Gotham that feels both fresh and faithful to the character's roots.",
@@ -204,7 +243,19 @@ const mockAIReviews: { [key: number]: AIReview } = {
       "The nearly three-hour runtime might test some viewers' patience",
       "The consistently dark tone offers little levity"
     ],
-    watchRecommendation: "Essential viewing for Batman fans and those who appreciate darker, detective-focused superhero stories"
+    watchRecommendation: "Essential viewing for Batman fans and those who appreciate darker, detective-focused superhero stories",
+    ottPopularity: [
+      {
+        platform: "HBO Max",
+        trending: true,
+        note: "Consistently popular on HBO Max since release"
+      },
+      {
+        platform: "Netflix",
+        trending: false,
+        note: "Recently added to Netflix catalog"
+      }
+    ]
   },
   5: {
     summary: "Everything Everywhere All at Once is a genre-defying masterpiece that blends science fiction, martial arts, comedy, and family drama into a visually inventive and emotionally resonant experience anchored by Michelle Yeoh's stellar performance.",
@@ -218,7 +269,20 @@ const mockAIReviews: { [key: number]: AIReview } = {
       "The frenetic pacing and visual chaos might overwhelm some viewers",
       "Abstract concepts may be confusing without total engagement"
     ],
-    watchRecommendation: "A must-watch for anyone seeking fresh, boundary-pushing filmmaking that balances heart with spectacle"
+    watchRecommendation: "A must-watch for anyone seeking fresh, boundary-pushing filmmaking that balances heart with spectacle",
+    ottPopularity: [
+      {
+        platform: "Netflix",
+        rank: 2,
+        trending: true,
+        note: "Currently #2 trending film on Netflix"
+      },
+      {
+        platform: "Showtime",
+        trending: true,
+        note: "Among most-watched content on Showtime"
+      }
+    ]
   },
   6: {
     summary: "Killers of the Flower Moon is a meticulously crafted historical epic that exposes a dark chapter in American history, featuring exceptional performances from Leonardo DiCaprio, Robert De Niro, and a breakthrough turn from Lily Gladstone.",
@@ -232,7 +296,15 @@ const mockAIReviews: { [key: number]: AIReview } = {
       "The three-and-a-half-hour runtime requires viewer commitment",
       "Deliberately methodical pacing may test patience"
     ],
-    watchRecommendation: "Essential viewing for those interested in American history and appreciate methodical, character-driven storytelling"
+    watchRecommendation: "Essential viewing for those interested in American history and appreciate methodical, character-driven storytelling",
+    ottPopularity: [
+      {
+        platform: "Apple TV+",
+        rank: 1,
+        trending: true,
+        note: "Top performing original film on Apple TV+"
+      }
+    ]
   }
 };
 
@@ -245,11 +317,34 @@ export const getTopMovies = async (): Promise<Movie[]> => {
 };
 
 export const getTrendingMovies = async (): Promise<Movie[]> => {
-  // Simulate API call delay and return shuffled movies
+  // Get all movies and sort them by OTT popularity - those with trending status on platforms
+  // This simulates getting trend data from real OTT platforms
   return new Promise((resolve) => {
     setTimeout(() => {
-      const shuffled = [...mockMovies].sort(() => 0.5 - Math.random());
-      resolve(shuffled.slice(0, 4));
+      // Create a scoring system based on mock OTT popularity data
+      const moviesWithScores = mockMovies.map(movie => {
+        const aiReview = mockAIReviews[movie.id];
+        let ottScore = 0;
+        
+        // Calculate OTT popularity score based on trending status and rank
+        if (aiReview && aiReview.ottPopularity) {
+          aiReview.ottPopularity.forEach(platform => {
+            if (platform.trending) ottScore += 5;
+            if (platform.rank === 1) ottScore += 5;
+            else if (platform.rank && platform.rank <= 3) ottScore += 3;
+            else if (platform.rank && platform.rank <= 10) ottScore += 1;
+          });
+        }
+        
+        return { movie, ottScore };
+      });
+      
+      // Sort by OTT popularity score (descending)
+      const sortedMovies = [...moviesWithScores]
+        .sort((a, b) => b.ottScore - a.ottScore)
+        .map(item => item.movie);
+      
+      resolve(sortedMovies);
     }, 800);
   });
 };
@@ -328,8 +423,26 @@ export const generateAIReview = async (movieId: number): Promise<AIReview> => {
   }
 };
 
-// Keep the simulated review generation as a fallback
+// Modified simulated review generation to include OTT data
 const generateSimulatedReview = (movie: Movie): AIReview => {
+  const ottPlatforms = ["Netflix", "Disney+", "Prime Video", "HBO Max", "Hulu", "Apple TV+"];
+  const randomPlatforms = [...ottPlatforms].sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 3) + 1);
+  
+  const ottPopularity = randomPlatforms.map(platform => {
+    const isTrending = Math.random() > 0.5;
+    const hasRank = Math.random() > 0.7;
+    const rank = hasRank ? Math.floor(Math.random() * 10) + 1 : undefined;
+    
+    return {
+      platform,
+      rank,
+      trending: isTrending,
+      note: isTrending 
+        ? `${rank ? `Currently #${rank}` : 'Trending'} on ${platform}` 
+        : `Available on ${platform}`
+    };
+  });
+
   return {
     summary: `${movie.title} is a ${movie.voteAverage > 7.5 ? 'compelling' : 'mixed'} ${movie.genres.join('/')} film that ${movie.voteAverage > 7 ? 'captivates audiences' : 'offers some entertainment value'} with its ${movie.voteAverage > 7 ? 'strong' : 'moderate'} storytelling and ${movie.voteAverage > 7.5 ? 'exceptional' : 'decent'} performances.`,
     pros: [
@@ -345,7 +458,8 @@ const generateSimulatedReview = (movie: Movie): AIReview => {
     ],
     watchRecommendation: movie.voteAverage > 7.5 
       ? `A must-watch for fans of ${movie.genres.join(' and ')} that delivers on all fronts` 
-      : `Worth watching for ${movie.genres.join(' and ')} enthusiasts, though it may not appeal to everyone`
+      : `Worth watching for ${movie.genres.join(' and ')} enthusiasts, though it may not appeal to everyone`,
+    ottPopularity
   };
 };
 
