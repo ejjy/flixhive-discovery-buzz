@@ -1,4 +1,5 @@
 import { Movie, Review, AIReview } from "@/types/movie";
+import { generateMovieReviewWithAI } from "@/utils/openaiService";
 
 // Mock movie data
 const mockMovies: Movie[] = [
@@ -275,7 +276,7 @@ export const getAIReview = async (movieId: number): Promise<AIReview | undefined
     });
   }
   
-  // For new movies, generate a review dynamically
+  // For new movies, generate a review dynamically using OpenAI
   return generateAIReview(movieId);
 };
 
@@ -290,44 +291,58 @@ export const generateAIReview = async (movieId: number): Promise<AIReview> => {
     
     console.log(`Generating AI review for: ${movie.title}`);
     
-    // In a real implementation, we would call an AI service here
-    // For now, we'll create a dynamic review based on movie properties
-    
-    // Simulate network delay for AI processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Generate a dynamic review based on movie properties
-    const aiReview: AIReview = {
-      summary: `${movie.title} is a ${movie.voteAverage > 7.5 ? 'compelling' : 'mixed'} ${movie.genres.join('/')} film that ${movie.voteAverage > 7 ? 'captivates audiences' : 'offers some entertainment value'} with its ${movie.voteAverage > 7 ? 'strong' : 'moderate'} storytelling and ${movie.voteAverage > 7.5 ? 'exceptional' : 'decent'} performances.`,
-      pros: [
-        `${movie.genres[0]} elements are well-executed`,
-        `Strong visual direction and cinematography`,
-        movie.voteAverage > 7.5 ? 'Outstanding performances from the cast' : 'Solid acting from the main characters',
-        `Engaging ${movie.genres.includes('Action') ? 'action sequences' : 'narrative pacing'}`
-      ],
-      cons: [
-        movie.voteAverage < 8 ? 'Some pacing issues in the middle act' : 'Minor plot inconsistencies',
-        'May not appeal to viewers unfamiliar with the genre',
-        movie.voteAverage < 7.5 ? 'Character development feels rushed at times' : 'A few underdeveloped supporting characters'
-      ],
-      watchRecommendation: movie.voteAverage > 7.5 
-        ? `A must-watch for fans of ${movie.genres.join(' and ')} that delivers on all fronts` 
-        : `Worth watching for ${movie.genres.join(' and ')} enthusiasts, though it may not appeal to everyone`
-    };
-    
-    console.log("Generated AI review:", aiReview);
-    return aiReview;
-    
+    try {
+      // Call the OpenAI API to generate a review
+      const aiReviewContent = await generateMovieReviewWithAI(
+        movie.title,
+        movie.overview, 
+        movie.genres
+      );
+      
+      console.log("Generated AI review:", aiReviewContent);
+      return aiReviewContent;
+    } catch (aiError) {
+      console.error("Error calling OpenAI API:", aiError);
+      
+      // If OpenAI API fails or API key is not set, fall back to the simulated review
+      if ((aiError as Error).message.includes("API key not configured")) {
+        console.log("API key not configured, falling back to simulated review");
+        return generateSimulatedReview(movie);
+      }
+      
+      throw aiError;
+    }
   } catch (error) {
     console.error("Error generating AI review:", error);
     // Return a fallback review if something goes wrong
     return {
-      summary: "We couldn't generate a complete AI review for this movie at the moment.",
+      summary: "We couldn't generate a complete AI review for this movie at this time.",
       pros: ["The film has received attention from critics and audiences"],
       cons: ["Limited information is available for a complete analysis"],
       watchRecommendation: "Consider checking critic and user reviews before watching"
     };
   }
+};
+
+// Keep the simulated review generation as a fallback
+const generateSimulatedReview = (movie: Movie): AIReview => {
+  return {
+    summary: `${movie.title} is a ${movie.voteAverage > 7.5 ? 'compelling' : 'mixed'} ${movie.genres.join('/')} film that ${movie.voteAverage > 7 ? 'captivates audiences' : 'offers some entertainment value'} with its ${movie.voteAverage > 7 ? 'strong' : 'moderate'} storytelling and ${movie.voteAverage > 7.5 ? 'exceptional' : 'decent'} performances.`,
+    pros: [
+      `${movie.genres[0]} elements are well-executed`,
+      `Strong visual direction and cinematography`,
+      movie.voteAverage > 7.5 ? 'Outstanding performances from the cast' : 'Solid acting from the main characters',
+      `Engaging ${movie.genres.includes('Action') ? 'action sequences' : 'narrative pacing'}`
+    ],
+    cons: [
+      movie.voteAverage < 8 ? 'Some pacing issues in the middle act' : 'Minor plot inconsistencies',
+      'May not appeal to viewers unfamiliar with the genre',
+      movie.voteAverage < 7.5 ? 'Character development feels rushed at times' : 'A few underdeveloped supporting characters'
+    ],
+    watchRecommendation: movie.voteAverage > 7.5 
+      ? `A must-watch for fans of ${movie.genres.join(' and ')} that delivers on all fronts` 
+      : `Worth watching for ${movie.genres.join(' and ')} enthusiasts, though it may not appeal to everyone`
+  };
 };
 
 const savedMovies: number[] = [];
