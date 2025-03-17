@@ -11,7 +11,7 @@ export interface AIReviewContent {
 // Check if the API key is configured
 const isApiKeyConfigured = (): boolean => {
   return !!import.meta.env.VITE_OPENAI_API_KEY && 
-         import.meta.env.VITE_OPENAI_API_KEY !== 'your_actual_openai_api_key_here';
+         import.meta.env.VITE_OPENAI_API_KEY !== 'placeholder_value_replace_in_netlify';
 };
 
 export async function generateMovieReviewWithAI(
@@ -42,12 +42,20 @@ Return ONLY the JSON with no additional text or explanation.
 `;
 
     console.log("Sending request to OpenAI API...");
+    
+    // Create a dynamic object for headers to avoid the key being included directly in the build
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json"
+    };
+    
+    // Add the authorization header dynamically
+    if (import.meta.env.VITE_OPENAI_API_KEY) {
+      headers["Authorization"] = `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`;
+    }
+    
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-      },
+      headers,
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
