@@ -9,7 +9,8 @@ import {
   AlertCircle,
   Activity,
   BarChart,
-  Search
+  Search,
+  Settings
 } from 'lucide-react';
 import { 
   Table, 
