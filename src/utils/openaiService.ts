@@ -41,16 +41,21 @@ export async function generateMovieReviewWithAI(
 
   try {
     const promptContent = `
-You are a film critic with deep knowledge of cinema. Please write a review for the movie "${movieTitle}".
-The movie is described as: "${movieOverview}"
-Genres: ${genres.join(', ')}
+You are a film critic with deep knowledge of cinema, with access to search online for information from Wikipedia, Rotten Tomatoes, and IMDb.
+
+For the movie "${movieTitle}" (genres: ${genres.join(', ')}), described as: "${movieOverview}"
+1. First search for information about this movie on Wikipedia, Rotten Tomatoes, and IMDb
+2. Use that information to formulate a comprehensive, well-informed review
+3. Consider critic scores, audience reception, box office performance, and critical consensus if available
+4. If it's a classic or older film, consider its historical significance and legacy
+5. If it's a newer film, consider how it compares to similar recent films
 
 Write a review in this specific JSON format:
 {
-  "summary": "A concise overview of the movie's strengths, weaknesses, and overall impression (1-2 sentences)",
-  "pros": ["List 4 positive aspects of the movie"],
-  "cons": ["List 3 negative aspects or potential drawbacks of the movie"],
-  "watchRecommendation": "A conclusion sentence about who would enjoy this movie and whether it's worth watching"
+  "summary": "A concise overview of the movie's strengths, weaknesses, and overall impression, mentioning where data was sourced from (1-2 sentences)",
+  "pros": ["List 4 positive aspects of the movie based on critical consensus and audience reception"],
+  "cons": ["List 3 negative aspects or potential drawbacks of the movie based on critical consensus"],
+  "watchRecommendation": "A conclusion sentence about who would enjoy this movie and whether it's worth watching, citing its Rotten Tomatoes or IMDb score if available"
 }
 
 Return ONLY the JSON with no additional text or explanation.

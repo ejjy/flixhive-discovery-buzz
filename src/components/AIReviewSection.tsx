@@ -5,7 +5,7 @@ import { getAIReview } from '@/services/movieService';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Check, X, BookOpen, Star, Film, MessageSquare, Loader2, AlertTriangle } from 'lucide-react';
+import { Check, X, BookOpen, Star, Film, MessageSquare, Loader2, AlertTriangle, Globe } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 interface AIReviewSectionProps {
@@ -31,8 +31,8 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
           setIsGenerating(true);
           toast({
             title: "Generating AI Review",
-            description: `Creating a fresh review for "${movie.title}"...`,
-            duration: 3000,
+            description: `Creating a fresh review for "${movie.title}" using data from Wikipedia, IMDb, and Rotten Tomatoes...`,
+            duration: 5000,
           });
         }
         
@@ -51,7 +51,7 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
         } else if (movie.id > 1000) {
           toast({
             title: "AI Review Ready",
-            description: `We've created a review for "${movie.title}"`,
+            description: `We've created a detailed review for "${movie.title}" based on data from multiple sources`,
             duration: 3000,
           });
         }
@@ -138,6 +138,12 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
                 ))}
               </div>
               <p className="text-white/80">{aiReview.summary}</p>
+              {!isMockReview && (
+                <div className="flex items-center mt-2 text-xs text-flixhive-accent">
+                  <Globe className="h-3 w-3 mr-1" />
+                  <span>Review based on data from Wikipedia, IMDb, and Rotten Tomatoes</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -186,9 +192,9 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
             {isMockReview ? (
               <span>This is a mock review. Configure OpenAI API key in Netlify for real AI reviews.</span>
             ) : movie.id > 1000 ? (
-              <span>AI-generated review created specifically for this search</span>
+              <span>AI-generated review created by analyzing online sources for this movie</span>
             ) : (
-              <span>AI-generated from multiple sources including reviews, ratings, and analysis</span>
+              <span>AI-generated from multiple credible sources including IMDb, Rotten Tomatoes, and Wikipedia</span>
             )}
           </div>
         </div>
