@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { UserButton } from '@clerk/clerk-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +31,7 @@ const Navbar = () => {
     <nav className="bg-flixhive-dark/95 backdrop-blur-sm sticky top-0 z-50 py-4 px-4 md:px-8">
       <div className="container mx-auto flex justify-between items-center">
         <Link 
-          to="/" 
+          to="/home" 
           className="flex items-center space-x-2 text-white"
           onClick={() => setIsOpen(false)}
         >
@@ -40,7 +41,7 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-white hover:text-flixhive-accent transition-colors">
+          <Link to="/home" className="text-white hover:text-flixhive-accent transition-colors">
             Home
           </Link>
           <Link to="/movies" className="text-white hover:text-flixhive-accent transition-colors">
@@ -52,7 +53,7 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Search */}
-        <div className="hidden md:flex items-center space-x-2">
+        <div className="hidden md:flex items-center space-x-4">
           <form onSubmit={handleSearch} className="relative">
             <Input
               type="text"
@@ -70,21 +71,39 @@ const Navbar = () => {
               <Search className="h-4 w-4" />
             </Button>
           </form>
+          <UserButton 
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                userButtonAvatarBox: "w-9 h-9"
+              }
+            }}
+          />
         </div>
 
         {/* Mobile Menu Button */}
-        <Button
-          variant="ghost" 
-          size="icon"
-          className="md:hidden text-white"
-          onClick={toggleMenu}
-        >
-          {isOpen ? (
-            <X className="h-6 w-6" />
-          ) : (
-            <Menu className="h-6 w-6" />
-          )}
-        </Button>
+        <div className="md:hidden flex items-center gap-3">
+          <UserButton 
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                userButtonAvatarBox: "w-8 h-8"
+              }
+            }}
+          />
+          <Button
+            variant="ghost" 
+            size="icon"
+            className="text-white"
+            onClick={toggleMenu}
+          >
+            {isOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </Button>
+        </div>
 
         {/* Mobile Menu */}
         {isOpen && (
@@ -110,7 +129,7 @@ const Navbar = () => {
             </form>
             <div className="space-y-4">
               <Link 
-                to="/" 
+                to="/home" 
                 className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -132,14 +151,6 @@ const Navbar = () => {
               >
                 <Heart className="h-5 w-5" />
                 <span>Watchlist</span>
-              </Link>
-              <Link 
-                to="/profile" 
-                className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <User className="h-5 w-5" />
-                <span>Profile</span>
               </Link>
             </div>
           </div>
