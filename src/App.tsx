@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { WatchlistProvider } from "@/contexts/WatchlistContext";
-// import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-react";
+import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-react";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
@@ -21,22 +21,35 @@ import Profile from "./pages/Profile";
 import AdminPanel from "./pages/AdminPanel";
 
 // Your Clerk publishable key
-const CLERK_PUBLISHABLE_KEY = process.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_REPLACE_WITH_ACTUAL_KEY";
+// Replace this with your actual Clerk publishable key from your Clerk dashboard
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_REPLACE_WITH_ACTUAL_KEY";
 
 const queryClient = new QueryClient();
 
-// Temporary fix for the demo - bypassing authentication
+// ProtectedRoute component to handle auth checks
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  return <>{children}</>;
+  return (
+    <>
+      <SignedIn>{children}</SignedIn>
+      <SignedOut>
+        <Navigate to="/" replace />
+      </SignedOut>
+    </>
+  );
 };
 
 // AdminRoute component to handle admin checks (simplified for demo)
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  return <ProtectedRoute>{children}</ProtectedRoute>;
+  return (
+    <ProtectedRoute>
+      {/* Add actual admin role check here in a real application */}
+      {children}
+    </ProtectedRoute>
+  );
 };
 
 const App = () => (
-  // <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} clerkJSVersion="5.56.0-snapshot.v20250312225817">
+  <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} clerkJSVersion="5.56.0-snapshot.v20250312225817">
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WatchlistProvider>
@@ -45,14 +58,14 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               {/* Public routes (No Login Required) */}
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Landing />} />
               <Route path="/landing" element={<Landing />} />
               <Route path="/search" element={<SearchResults />} />
               <Route path="/movie/:id" element={<MovieDetail />} />
               <Route path="/trending" element={<Trending />} />
               <Route path="/about" element={<About />} />
 
-              {/* User pages (Requires Login in production) */}
+              {/* User pages (Requires Login) */}
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
@@ -98,7 +111,7 @@ const App = () => (
         </WatchlistProvider>
       </TooltipProvider>
     </QueryClientProvider>
-  // </ClerkProvider>
+  </ClerkProvider>
 );
 
 export default App;
