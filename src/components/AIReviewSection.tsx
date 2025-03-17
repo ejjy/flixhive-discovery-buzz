@@ -5,33 +5,62 @@ import { getAIReview } from '@/services/movieService';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Check, X, BookOpen, Star, Film, MessageSquare } from 'lucide-react';
+import { Check, X, BookOpen, Star, Film, MessageSquare, Loader2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 interface AIReviewSectionProps {
   movie: Movie;
 }
 
 const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [aiReview, setAiReview] = useState<any>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     const fetchAIReview = async () => {
       setIsLoading(true);
+      setIsGenerating(false);
       try {
+        // Check if it's a newly discovered movie (ID > 1000)
+        if (movie.id > 1000) {
+          setIsGenerating(true);
+          toast({
+            title: "Generating AI Review",
+            description: `Creating a fresh review for "${movie.title}"...`,
+            duration: 3000,
+          });
+        }
+        
         const reviewData = await getAIReview(movie.id);
         setAiReview(reviewData);
+        
+        if (movie.id > 1000) {
+          toast({
+            title: "AI Review Ready",
+            description: `We've created a review for "${movie.title}"`,
+            duration: 3000,
+          });
+        }
       } catch (error) {
         console.error('Error fetching AI review:', error);
+        toast({
+          title: "Error",
+          description: "Couldn't generate an AI review at this time",
+          variant: "destructive",
+          duration: 3000,
+        });
       } finally {
         setIsLoading(false);
+        setIsGenerating(false);
       }
     };
 
     if (movie) {
       fetchAIReview();
     }
-  }, [movie]);
+  }, [movie, toast]);
 
   if (isLoading) {
     return (
@@ -63,6 +92,12 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
       <div className="flex items-center gap-3">
         <Film className="h-8 w-8 text-flixhive-accent" />
         <h2 className="text-2xl font-bold">{movie.title} - AI Review</h2>
+        {isGenerating && (
+          <div className="ml-auto flex items-center gap-2 text-flixhive-accent animate-pulse">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm">Generating review...</span>
+          </div>
+        )}
       </div>
 
       <Card className="p-6 bg-flixhive-gray/30 border border-white/10">
@@ -130,7 +165,11 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
 
           <div className="mt-4 text-xs text-white/40 flex items-center gap-1">
             <BookOpen className="h-3 w-3" />
-            <span>AI-generated from multiple sources including reviews, ratings, and analysis</span>
+            {movie.id > 1000 ? (
+              <span>AI-generated review created specifically for this search</span>
+            ) : (
+              <span>AI-generated from multiple sources including reviews, ratings, and analysis</span>
+            )}
           </div>
         </div>
       </Card>

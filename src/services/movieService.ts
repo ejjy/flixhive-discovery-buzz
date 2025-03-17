@@ -268,10 +268,66 @@ export const getMovieReviews = async (movieId: number): Promise<Review[]> => {
 };
 
 export const getAIReview = async (movieId: number): Promise<AIReview | undefined> => {
-  // Simulate API call delay
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(mockAIReviews[movieId]), 1000);
-  });
+  // For existing movies in our mock database, return the pre-defined review
+  if (mockAIReviews[movieId]) {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(mockAIReviews[movieId]), 1000);
+    });
+  }
+  
+  // For new movies, generate a review dynamically
+  return generateAIReview(movieId);
+};
+
+export const generateAIReview = async (movieId: number): Promise<AIReview> => {
+  try {
+    // Get the movie details first
+    const movie = await getMovieById(movieId);
+    
+    if (!movie) {
+      throw new Error("Movie not found");
+    }
+    
+    console.log(`Generating AI review for: ${movie.title}`);
+    
+    // In a real implementation, we would call an AI service here
+    // For now, we'll create a dynamic review based on movie properties
+    
+    // Simulate network delay for AI processing
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Generate a dynamic review based on movie properties
+    const aiReview: AIReview = {
+      summary: `${movie.title} is a ${movie.voteAverage > 7.5 ? 'compelling' : 'mixed'} ${movie.genres.join('/')} film that ${movie.voteAverage > 7 ? 'captivates audiences' : 'offers some entertainment value'} with its ${movie.voteAverage > 7 ? 'strong' : 'moderate'} storytelling and ${movie.voteAverage > 7.5 ? 'exceptional' : 'decent'} performances.`,
+      pros: [
+        `${movie.genres[0]} elements are well-executed`,
+        `Strong visual direction and cinematography`,
+        movie.voteAverage > 7.5 ? 'Outstanding performances from the cast' : 'Solid acting from the main characters',
+        `Engaging ${movie.genres.includes('Action') ? 'action sequences' : 'narrative pacing'}`
+      ],
+      cons: [
+        movie.voteAverage < 8 ? 'Some pacing issues in the middle act' : 'Minor plot inconsistencies',
+        'May not appeal to viewers unfamiliar with the genre',
+        movie.voteAverage < 7.5 ? 'Character development feels rushed at times' : 'A few underdeveloped supporting characters'
+      ],
+      watchRecommendation: movie.voteAverage > 7.5 
+        ? `A must-watch for fans of ${movie.genres.join(' and ')} that delivers on all fronts` 
+        : `Worth watching for ${movie.genres.join(' and ')} enthusiasts, though it may not appeal to everyone`
+    };
+    
+    console.log("Generated AI review:", aiReview);
+    return aiReview;
+    
+  } catch (error) {
+    console.error("Error generating AI review:", error);
+    // Return a fallback review if something goes wrong
+    return {
+      summary: "We couldn't generate a complete AI review for this movie at the moment.",
+      pros: ["The film has received attention from critics and audiences"],
+      cons: ["Limited information is available for a complete analysis"],
+      watchRecommendation: "Consider checking critic and user reviews before watching"
+    };
+  }
 };
 
 const savedMovies: number[] = [];
@@ -306,14 +362,39 @@ export const unsaveMovie = async (movieId: number): Promise<number[]> => {
 };
 
 export const searchMovies = async (query: string): Promise<Movie[]> => {
-  // Simulate API call delay
+  // First check mock movies
+  const mockResults = mockMovies.filter(movie => 
+    movie.title.toLowerCase().includes(query.toLowerCase()) ||
+    movie.overview.toLowerCase().includes(query.toLowerCase())
+  );
+  
+  if (mockResults.length > 0) {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(mockResults), 500);
+    });
+  }
+  
+  // If no matching movies in our mock DB, generate a fake movie with the search term
+  const generatedMovie: Movie = {
+    id: 1000 + Math.floor(Math.random() * 1000), // Generate a random ID
+    title: query.split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" "),
+    overview: `A fascinating story about ${query} that takes viewers on an unexpected journey through themes of adventure, discovery, and human connection.`,
+    posterPath: "https://image.tmdb.org/t/p/w500/placeholder.svg",
+    backdropPath: "https://image.tmdb.org/t/p/original/placeholder.svg",
+    releaseDate: new Date().toISOString().split('T')[0],
+    voteAverage: 7.0 + Math.random() * 2, // Random rating between 7.0 and 9.0
+    genres: ["Drama", "Adventure"],
+    runtime: 90 + Math.floor(Math.random() * 60), // Random runtime between 90 and 150 minutes
+    director: "Acclaimed Director",
+    cast: ["Leading Actor", "Supporting Actress", "Character Actor"],
+    platforms: ["Netflix", "Prime Video"],
+    platformRatings: [
+      { platform: "IMDb", score: 7.0 + Math.random() * 2, outOf: 10 },
+      { platform: "Rotten Tomatoes", score: 70 + Math.floor(Math.random() * 25), outOf: 100 }
+    ]
+  };
+  
   return new Promise((resolve) => {
-    setTimeout(() => {
-      const results = mockMovies.filter(movie => 
-        movie.title.toLowerCase().includes(query.toLowerCase()) ||
-        movie.overview.toLowerCase().includes(query.toLowerCase())
-      );
-      resolve(results);
-    }, 500);
+    setTimeout(() => resolve([generatedMovie]), 800);
   });
 };
