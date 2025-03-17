@@ -154,13 +154,13 @@ const MovieDetail = () => {
                         <Progress 
                           value={(rating.score / rating.outOf) * 100} 
                           className="h-2"
-                          indicatorClassName={`${
+                          indicatorClassName={
                             rating.score / rating.outOf >= 0.75
                               ? 'bg-green-500'
                               : rating.score / rating.outOf >= 0.6
                               ? 'bg-yellow-500'
                               : 'bg-red-500'
-                          }`}
+                          }
                         />
                       </div>
                     ))}
@@ -348,3 +348,4 @@ const MovieDetail = () => {
 };
 
 export default MovieDetail;
+
