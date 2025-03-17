@@ -5,7 +5,7 @@ import { getAIReview } from '@/services/movieService';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Check, X, BookOpen, Star, Film, MessageSquare, Loader2 } from 'lucide-react';
+import { Check, X, BookOpen, Star, Film, MessageSquare, Loader2, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 interface AIReviewSectionProps {
@@ -17,11 +17,14 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [aiReview, setAiReview] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isMockReview, setIsMockReview] = useState(false);
 
   useEffect(() => {
     const fetchAIReview = async () => {
       setIsLoading(true);
       setIsGenerating(false);
+      setIsMockReview(false);
+      
       try {
         // Check if it's a newly discovered movie (ID > 1000)
         if (movie.id > 1000) {
@@ -36,7 +39,16 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
         const reviewData = await getAIReview(movie.id);
         setAiReview(reviewData);
         
-        if (movie.id > 1000) {
+        // Check if this is a mock review
+        if (reviewData.summary.includes("mock review") || reviewData.summary.includes("API key is not configured")) {
+          setIsMockReview(true);
+          toast({
+            title: "API Key Missing",
+            description: "Using mock review data. Add OpenAI API key in Netlify for real AI reviews.",
+            variant: "destructive",
+            duration: 5000,
+          });
+        } else if (movie.id > 1000) {
           toast({
             title: "AI Review Ready",
             description: `We've created a review for "${movie.title}"`,
@@ -96,6 +108,12 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
           <div className="ml-auto flex items-center gap-2 text-flixhive-accent animate-pulse">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span className="text-sm">Generating review...</span>
+          </div>
+        )}
+        {isMockReview && (
+          <div className="ml-auto flex items-center gap-2 text-yellow-500">
+            <AlertTriangle className="h-4 w-4" />
+            <span className="text-sm">Mock Review (API key not set)</span>
           </div>
         )}
       </div>
@@ -165,7 +183,9 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
 
           <div className="mt-4 text-xs text-white/40 flex items-center gap-1">
             <BookOpen className="h-3 w-3" />
-            {movie.id > 1000 ? (
+            {isMockReview ? (
+              <span>This is a mock review. Configure OpenAI API key in Netlify for real AI reviews.</span>
+            ) : movie.id > 1000 ? (
               <span>AI-generated review created specifically for this search</span>
             ) : (
               <span>AI-generated from multiple sources including reviews, ratings, and analysis</span>
