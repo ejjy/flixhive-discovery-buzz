@@ -13,6 +13,11 @@ import Watchlist from "./pages/Watchlist";
 import Movies from "./pages/Movies";
 import SearchResults from "./pages/SearchResults";
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
+import Trending from "./pages/Trending";
+import Reviews from "./pages/Reviews";
+import Profile from "./pages/Profile";
+import AdminPanel from "./pages/AdminPanel";
 
 // Your Clerk publishable key
 const CLERK_PUBLISHABLE_KEY = process.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_REPLACE_WITH_ACTUAL_KEY";
@@ -31,6 +36,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// AdminRoute component to handle admin checks (simplified for demo)
+// In a real app, you would check if the user has admin role
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <ProtectedRoute>
+      {/* Add actual admin role check here in a real application */}
+      {children}
+    </ProtectedRoute>
+  );
+};
+
 const App = () => (
   <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} clerkJSVersion="5.56.0-snapshot.v20250312225817">
     <QueryClientProvider client={queryClient}>
@@ -40,18 +56,22 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Public routes */}
+              {/* Public routes (No Login Required) */}
               <Route path="/" element={<Landing />} />
-              
-              {/* Protected routes */}
-              <Route path="/home" element={
+              <Route path="/search" element={<SearchResults />} />
+              <Route path="/movie/:id" element={<MovieDetail />} />
+              <Route path="/trending" element={<Trending />} />
+              <Route path="/about" element={<About />} />
+
+              {/* User pages (Requires Login) */}
+              <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
               } />
-              <Route path="/movie/:id" element={
+              <Route path="/home" element={
                 <ProtectedRoute>
-                  <MovieDetail />
+                  <Dashboard />
                 </ProtectedRoute>
               } />
               <Route path="/watchlist" element={
@@ -59,18 +79,30 @@ const App = () => (
                   <Watchlist />
                 </ProtectedRoute>
               } />
+              <Route path="/reviews" element={
+                <ProtectedRoute>
+                  <Reviews />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
               <Route path="/movies" element={
                 <ProtectedRoute>
                   <Movies />
                 </ProtectedRoute>
               } />
-              <Route path="/search" element={
-                <ProtectedRoute>
-                  <SearchResults />
-                </ProtectedRoute>
+              
+              {/* Admin pages */}
+              <Route path="/admin" element={
+                <AdminRoute>
+                  <AdminPanel />
+                </AdminRoute>
               } />
               
-              {/* Default redirect to landing for non-authenticated and 404 */}
+              {/* 404 for non-matched routes */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

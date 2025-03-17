@@ -1,12 +1,12 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu, X, Film, Heart, User, Home } from 'lucide-react';
+import { Search, Menu, X, Film, Heart, User, Home, TrendingUp, Info, MessageSquare, Settings, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { UserButton } from '@clerk/clerk-react';
+import { UserButton, SignedIn, SignedOut, SignInButton } from '@clerk/clerk-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +31,7 @@ const Navbar = () => {
     <nav className="bg-flixhive-dark/95 backdrop-blur-sm sticky top-0 z-50 py-4 px-4 md:px-8">
       <div className="container mx-auto flex justify-between items-center">
         <Link 
-          to="/home" 
+          to="/" 
           className="flex items-center space-x-2 text-white"
           onClick={() => setIsOpen(false)}
         >
@@ -41,15 +41,40 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-6">
-          <Link to="/home" className="text-white hover:text-flixhive-accent transition-colors">
-            Home
-          </Link>
-          <Link to="/movies" className="text-white hover:text-flixhive-accent transition-colors">
-            Movies
-          </Link>
-          <Link to="/watchlist" className="text-white hover:text-flixhive-accent transition-colors">
-            Watchlist
-          </Link>
+          <SignedIn>
+            <Link to="/dashboard" className="text-white hover:text-flixhive-accent transition-colors">
+              Home
+            </Link>
+            <Link to="/movies" className="text-white hover:text-flixhive-accent transition-colors">
+              Movies
+            </Link>
+            <Link to="/trending" className="text-white hover:text-flixhive-accent transition-colors">
+              Trending
+            </Link>
+            <Link to="/watchlist" className="text-white hover:text-flixhive-accent transition-colors">
+              Watchlist
+            </Link>
+            <Link to="/reviews" className="text-white hover:text-flixhive-accent transition-colors">
+              Reviews
+            </Link>
+            <Link to="/about" className="text-white hover:text-flixhive-accent transition-colors">
+              About
+            </Link>
+          </SignedIn>
+          <SignedOut>
+            <Link to="/" className="text-white hover:text-flixhive-accent transition-colors">
+              Home
+            </Link>
+            <Link to="/trending" className="text-white hover:text-flixhive-accent transition-colors">
+              Trending
+            </Link>
+            <Link to="/search" className="text-white hover:text-flixhive-accent transition-colors">
+              Search
+            </Link>
+            <Link to="/about" className="text-white hover:text-flixhive-accent transition-colors">
+              About
+            </Link>
+          </SignedOut>
         </div>
 
         {/* Desktop Search */}
@@ -71,26 +96,44 @@ const Navbar = () => {
               <Search className="h-4 w-4" />
             </Button>
           </form>
-          <UserButton 
-            afterSignOutUrl="/"
-            appearance={{
-              elements: {
-                userButtonAvatarBox: "w-9 h-9"
-              }
-            }}
-          />
+          <SignedIn>
+            <UserButton 
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: "w-9 h-9"
+                }
+              }}
+            />
+          </SignedIn>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <Button className="bg-flixhive-accent hover:bg-flixhive-accent/90">
+                Sign In
+              </Button>
+            </SignInButton>
+          </SignedOut>
         </div>
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center gap-3">
-          <UserButton 
-            afterSignOutUrl="/"
-            appearance={{
-              elements: {
-                userButtonAvatarBox: "w-8 h-8"
-              }
-            }}
-          />
+          <SignedIn>
+            <UserButton 
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: "w-8 h-8"
+                }
+              }}
+            />
+          </SignedIn>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <Button size="sm" className="bg-flixhive-accent hover:bg-flixhive-accent/90">
+                Sign In
+              </Button>
+            </SignInButton>
+          </SignedOut>
           <Button
             variant="ghost" 
             size="icon"
@@ -128,30 +171,98 @@ const Navbar = () => {
               </div>
             </form>
             <div className="space-y-4">
-              <Link 
-                to="/home" 
-                className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <Home className="h-5 w-5" />
-                <span>Home</span>
-              </Link>
-              <Link 
-                to="/movies" 
-                className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <Film className="h-5 w-5" />
-                <span>Movies</span>
-              </Link>
-              <Link 
-                to="/watchlist" 
-                className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <Heart className="h-5 w-5" />
-                <span>Watchlist</span>
-              </Link>
+              <SignedIn>
+                <Link 
+                  to="/dashboard" 
+                  className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Home className="h-5 w-5" />
+                  <span>Home</span>
+                </Link>
+                <Link 
+                  to="/movies" 
+                  className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Film className="h-5 w-5" />
+                  <span>Movies</span>
+                </Link>
+                <Link 
+                  to="/trending" 
+                  className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <TrendingUp className="h-5 w-5" />
+                  <span>Trending</span>
+                </Link>
+                <Link 
+                  to="/watchlist" 
+                  className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Heart className="h-5 w-5" />
+                  <span>Watchlist</span>
+                </Link>
+                <Link 
+                  to="/reviews" 
+                  className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <MessageSquare className="h-5 w-5" />
+                  <span>Reviews</span>
+                </Link>
+                <Link 
+                  to="/profile" 
+                  className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <User className="h-5 w-5" />
+                  <span>Profile</span>
+                </Link>
+                <Link 
+                  to="/about" 
+                  className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Info className="h-5 w-5" />
+                  <span>About</span>
+                </Link>
+              </SignedIn>
+              <SignedOut>
+                <Link 
+                  to="/" 
+                  className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Home className="h-5 w-5" />
+                  <span>Home</span>
+                </Link>
+                <Link 
+                  to="/trending" 
+                  className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <TrendingUp className="h-5 w-5" />
+                  <span>Trending</span>
+                </Link>
+                <Link 
+                  to="/search" 
+                  className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Search className="h-5 w-5" />
+                  <span>Search</span>
+                </Link>
+                <Link 
+                  to="/about" 
+                  className="flex items-center space-x-2 text-white hover:text-flixhive-accent transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Info className="h-5 w-5" />
+                  <span>About</span>
+                </Link>
+              </SignedOut>
             </div>
           </div>
         )}
