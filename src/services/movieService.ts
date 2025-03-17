@@ -95,7 +95,7 @@ const mockMovies: Movie[] = [
     platformRatings: [
       { platform: "IMDb", score: 7.8, outOf: 10 },
       { platform: "Rotten Tomatoes", score: 94, outOf: 100 },
-      { platform: "Metacritic", score: 81, OutOf: 100 }
+      { platform: "Metacritic", score: 81, outOf: 100 }
     ]
   },
   {
