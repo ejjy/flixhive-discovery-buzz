@@ -1,4 +1,3 @@
-
 import { Movie, Review, AIReview } from "@/types/movie";
 
 // Mock movie data
@@ -15,7 +14,12 @@ const mockMovies: Movie[] = [
     runtime: 166,
     director: "Denis Villeneuve",
     cast: ["Timothée Chalamet", "Zendaya", "Rebecca Ferguson", "Josh Brolin"],
-    platforms: ["HBO Max", "Theaters"]
+    platforms: ["HBO Max", "Theaters"],
+    platformRatings: [
+      { platform: "IMDb", score: 8.5, outOf: 10 },
+      { platform: "Rotten Tomatoes", score: 92, outOf: 100 },
+      { platform: "Metacritic", score: 79, outOf: 100 }
+    ]
   },
   {
     id: 2,
@@ -29,7 +33,12 @@ const mockMovies: Movie[] = [
     runtime: 180,
     director: "Christopher Nolan",
     cast: ["Cillian Murphy", "Emily Blunt", "Matt Damon", "Robert Downey Jr."],
-    platforms: ["Prime Video", "Apple TV"]
+    platforms: ["Prime Video", "Apple TV"],
+    platformRatings: [
+      { platform: "IMDb", score: 8.3, outOf: 10 },
+      { platform: "Rotten Tomatoes", score: 93, outOf: 100 },
+      { platform: "Metacritic", score: 88, outOf: 100 }
+    ]
   },
   {
     id: 3,
@@ -43,7 +52,12 @@ const mockMovies: Movie[] = [
     runtime: 141,
     director: "Yorgos Lanthimos",
     cast: ["Emma Stone", "Mark Ruffalo", "Willem Dafoe", "Ramy Youssef"],
-    platforms: ["Hulu", "Disney+"]
+    platforms: ["Hulu", "Disney+"],
+    platformRatings: [
+      { platform: "IMDb", score: 7.8, outOf: 10 },
+      { platform: "Rotten Tomatoes", score: 92, outOf: 100 },
+      { platform: "Metacritic", score: 87, outOf: 100 }
+    ]
   },
   {
     id: 4,
@@ -57,7 +71,12 @@ const mockMovies: Movie[] = [
     runtime: 176,
     director: "Matt Reeves",
     cast: ["Robert Pattinson", "Zoë Kravitz", "Jeffrey Wright", "Colin Farrell"],
-    platforms: ["HBO Max", "Netflix"]
+    platforms: ["HBO Max", "Netflix"],
+    platformRatings: [
+      { platform: "IMDb", score: 7.8, outOf: 10 },
+      { platform: "Rotten Tomatoes", score: 85, outOf: 100 },
+      { platform: "Metacritic", score: 72, outOf: 100 }
+    ]
   },
   {
     id: 5,
@@ -71,7 +90,12 @@ const mockMovies: Movie[] = [
     runtime: 139,
     director: "Daniel Kwan, Daniel Scheinert",
     cast: ["Michelle Yeoh", "Ke Huy Quan", "Stephanie Hsu", "Jamie Lee Curtis"],
-    platforms: ["Netflix", "Showtime"]
+    platforms: ["Netflix", "Showtime"],
+    platformRatings: [
+      { platform: "IMDb", score: 7.8, outOf: 10 },
+      { platform: "Rotten Tomatoes", score: 94, outOf: 100 },
+      { platform: "Metacritic", score: 81, outOf: 100 }
+    ]
   },
   {
     id: 6,
@@ -85,7 +109,12 @@ const mockMovies: Movie[] = [
     runtime: 206,
     director: "Martin Scorsese",
     cast: ["Leonardo DiCaprio", "Robert De Niro", "Lily Gladstone", "Jesse Plemons"],
-    platforms: ["Apple TV+"]
+    platforms: ["Apple TV+"],
+    platformRatings: [
+      { platform: "IMDb", score: 7.7, outOf: 10 },
+      { platform: "Rotten Tomatoes", score: 93, outOf: 100 },
+      { platform: "Metacritic", score: 89, outOf: 100 }
+    ]
   },
 ];
 

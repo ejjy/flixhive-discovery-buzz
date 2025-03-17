@@ -12,6 +12,11 @@ export interface Movie {
   director?: string;
   cast?: string[];
   platforms?: string[];
+  platformRatings?: {
+    platform: string;
+    score: number;
+    outOf: number;
+  }[];
 }
 
 export interface Review {

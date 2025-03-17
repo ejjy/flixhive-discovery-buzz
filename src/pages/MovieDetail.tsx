@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -19,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 import { 
   getMovieById, 
   getMovieReviews,
@@ -138,6 +138,35 @@ const MovieDetail = () => {
                   </>
                 )}
               </Button>
+              
+              {movie.platformRatings && movie.platformRatings.length > 0 && (
+                <div className="bg-flixhive-gray/30 rounded-lg p-4 mt-4">
+                  <h3 className="font-medium mb-3">Ratings Across Platforms:</h3>
+                  <div className="space-y-3">
+                    {movie.platformRatings.map((rating, index) => (
+                      <div key={index} className="flex flex-col">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm">{rating.platform}</span>
+                          <span className="text-sm font-medium">
+                            {rating.score}/{rating.outOf}
+                          </span>
+                        </div>
+                        <Progress 
+                          value={(rating.score / rating.outOf) * 100} 
+                          className="h-2"
+                          indicatorClassName={`${
+                            rating.score / rating.outOf >= 0.75
+                              ? 'bg-green-500'
+                              : rating.score / rating.outOf >= 0.6
+                              ? 'bg-yellow-500'
+                              : 'bg-red-500'
+                          }`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               
               {movie.platforms && movie.platforms.length > 0 && (
                 <div className="bg-flixhive-gray/30 rounded-lg p-4">
