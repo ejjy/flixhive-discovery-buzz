@@ -1,0 +1,30 @@
+
+export interface Movie {
+  id: number;
+  title: string;
+  overview: string;
+  posterPath: string;
+  backdropPath: string;
+  releaseDate: string;
+  voteAverage: number;
+  genres: string[];
+  runtime?: number;
+  director?: string;
+  cast?: string[];
+  platforms?: string[];
+}
+
+export interface Review {
+  id: number;
+  author: string;
+  content: string;
+  rating: number;
+  createdAt: string;
+}
+
+export interface AIReview {
+  summary: string;
+  pros: string[];
+  cons: string[];
+  watchRecommendation: string;
+}
