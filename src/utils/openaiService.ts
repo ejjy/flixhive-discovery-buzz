@@ -1,5 +1,5 @@
 
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+// We'll avoid directly referencing the API key in the code
 
 export interface AIReviewContent {
   summary: string;
@@ -8,14 +8,20 @@ export interface AIReviewContent {
   watchRecommendation: string;
 }
 
+// Check if the API key is configured
+const isApiKeyConfigured = (): boolean => {
+  return !!import.meta.env.VITE_OPENAI_API_KEY && 
+         import.meta.env.VITE_OPENAI_API_KEY !== 'your_actual_openai_api_key_here';
+};
+
 export async function generateMovieReviewWithAI(
   movieTitle: string,
   movieOverview: string,
   genres: string[]
 ): Promise<AIReviewContent> {
-  if (!OPENAI_API_KEY) {
+  if (!isApiKeyConfigured()) {
     console.error("OpenAI API key is not set in environment variables");
-    throw new Error("API key not configured. Please set VITE_OPENAI_API_KEY in your .env file.");
+    throw new Error("API key not configured. Please set VITE_OPENAI_API_KEY in your environment variables.");
   }
 
   try {
@@ -40,7 +46,7 @@ Return ONLY the JSON with no additional text or explanation.
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
