@@ -107,7 +107,7 @@ const Navbar = () => {
             />
           </SignedIn>
           <SignedOut>
-            <SignInButton mode="modal" afterSignInUrl="/dashboard">
+            <SignInButton mode="modal" redirectUrl="/dashboard">
               <Button className="bg-flixhive-accent hover:bg-flixhive-accent/90">
                 Sign In
               </Button>
@@ -128,7 +128,7 @@ const Navbar = () => {
             />
           </SignedIn>
           <SignedOut>
-            <SignInButton mode="modal" afterSignInUrl="/dashboard">
+            <SignInButton mode="modal" redirectUrl="/dashboard">
               <Button size="sm" className="bg-flixhive-accent hover:bg-flixhive-accent/90">
                 Sign In
               </Button>

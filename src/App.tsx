@@ -83,10 +83,6 @@ const App = () => (
           title: "Sign in to FlixHive",
           subtitle: "to continue to FlixHive"
         },
-        password: {
-          title: "Enter your password",
-          subtitle: "to continue to FlixHive"
-        },
         emailCode: {
           title: "Check your email",
           subtitle: "to continue to FlixHive"
@@ -100,10 +96,6 @@ const App = () => (
         emailLink: {
           title: "Verify your email",
           subtitle: "to continue to FlixHive"
-        },
-        password: {
-          title: "Create a password",
-          subtitle: "to secure your account"
         }
       }
     }}

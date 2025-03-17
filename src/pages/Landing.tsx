@@ -33,13 +33,13 @@ const Landing = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4">
-          <SignUpButton mode="modal" afterSignUpUrl="/dashboard">
+          <SignUpButton mode="modal" redirectUrl="/dashboard">
             <Button size="lg" className="bg-flixhive-accent hover:bg-flixhive-accent/90">
               Get Started
             </Button>
           </SignUpButton>
           
-          <SignInButton mode="modal" afterSignInUrl="/dashboard">
+          <SignInButton mode="modal" redirectUrl="/dashboard">
             <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/5">
               Sign In
             </Button>
