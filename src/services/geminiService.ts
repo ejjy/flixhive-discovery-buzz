@@ -9,6 +9,7 @@ export const generateAIReview = async (
     ratings?: { source: string; value: string }[];
     releaseYear?: string;
     director?: string;
+    actors?: string[];
   }
 ) => {
   const prompt = `
@@ -19,6 +20,7 @@ export const generateAIReview = async (
     - Genres: ${movieData.genres?.join(', ') || 'Not provided'}
     - Release Year: ${movieData.releaseYear || 'Not provided'}
     - Director: ${movieData.director || 'Not provided'}
+    - Cast: ${movieData.actors?.join(', ') || 'Not provided'}
     - Ratings: ${movieData.ratings?.map(r => `${r.source}: ${r.value}`).join(', ') || 'Not provided'}
     
     Please provide:

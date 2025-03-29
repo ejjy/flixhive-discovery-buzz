@@ -1,5 +1,5 @@
+
 import { Movie, Review, AIReview } from "@/types/movie";
-import { getTMDBMovieDetails, searchTMDBMovies } from "./tmdbService";
 import { getOMDBMovieDetails, searchOMDBMovies } from "./omdbService";
 import { generateAIReview } from "./geminiService";
 
@@ -311,32 +311,43 @@ const mockAIReviews: { [key: number]: AIReview } = {
 };
 
 // Service functions
-export const getMovieDetails = async (movieId: number): Promise<Movie> => {
+export const getMovieDetails = async (imdbId: string): Promise<Movie> => {
   try {
-    // Get TMDB details first
-    const tmdbData = await getTMDBMovieDetails(movieId.toString());
+    // Get OMDB details
+    const omdbData = await getOMDBMovieDetails(imdbId);
     
-    // Get OMDB details using IMDB ID from TMDB data
-    const omdbData = await getOMDBMovieDetails(tmdbData.imdb_id);
-    
-    // Combine the data from both APIs
-    const movieData = {
-      id: tmdbData.id,
-      title: tmdbData.title,
-      overview: tmdbData.overview,
-      posterPath: tmdbData.poster_path,
-      backdropPath: tmdbData.backdrop_path,
-      releaseDate: tmdbData.release_date,
-      voteAverage: tmdbData.vote_average,
-      genres: tmdbData.genres.map((g: { name: string }) => g.name),
-      runtime: tmdbData.runtime,
-      director: tmdbData.credits.crew.find((c: { job: string }) => c.job === 'Director')?.name,
-      cast: tmdbData.credits.cast.slice(0, 5).map((c: { name: string }) => c.name),
-      platforms: [], // This would require additional API for streaming availability
+    // Map OMDB data to our Movie type
+    const movieData: Movie = {
+      id: parseInt(omdbData.imdbID.replace('tt', ''), 10) || Math.floor(Math.random() * 10000),
+      title: omdbData.Title,
+      overview: omdbData.Plot,
+      posterPath: omdbData.Poster !== 'N/A' ? omdbData.Poster : 'https://image.tmdb.org/t/p/w500/placeholder.svg',
+      backdropPath: 'https://image.tmdb.org/t/p/original/placeholder.svg', // OMDB doesn't provide backdrop images
+      releaseDate: omdbData.Released !== 'N/A' ? omdbData.Released : omdbData.Year,
+      voteAverage: parseFloat(omdbData.imdbRating) || 0,
+      genres: omdbData.Genre ? omdbData.Genre.split(', ') : [],
+      runtime: omdbData.Runtime !== 'N/A' ? parseInt(omdbData.Runtime, 10) : undefined,
+      director: omdbData.Director !== 'N/A' ? omdbData.Director : undefined,
+      cast: omdbData.Actors !== 'N/A' ? omdbData.Actors.split(', ') : undefined,
+      platforms: [], // OMDB doesn't provide streaming availability
       platformRatings: [
-        { platform: 'IMDb', score: parseFloat(omdbData.imdbRating), outOf: 10 },
-        { platform: 'Rotten Tomatoes', score: parseInt(omdbData.Ratings?.find((r: { Source: string }) => r.Source === 'Rotten Tomatoes')?.Value || '0'), outOf: 100 },
-        { platform: 'Metacritic', score: parseInt(omdbData.Ratings?.find((r: { Source: string }) => r.Source === 'Metacritic')?.Value || '0'), outOf: 100 }
+        { platform: 'IMDb', score: parseFloat(omdbData.imdbRating) || 0, outOf: 10 },
+        ...(omdbData.Ratings || []).map((rating: any) => {
+          if (rating.Source === 'Rotten Tomatoes') {
+            return {
+              platform: 'Rotten Tomatoes',
+              score: parseInt(rating.Value, 10) || 0,
+              outOf: 100
+            };
+          } else if (rating.Source === 'Metacritic') {
+            return {
+              platform: 'Metacritic',
+              score: parseInt(rating.Value, 10) || 0,
+              outOf: 100
+            };
+          }
+          return null;
+        }).filter(Boolean)
       ]
     };
 
@@ -403,7 +414,7 @@ export const getMovieReviews = async (movieId: number): Promise<Review[]> => {
 
 export const getAIReview = async (movieId: number, forceRefresh = false): Promise<AIReview> => {
   try {
-    // Get combined movie data first
+    // Get movie data first
     const movieData = await getMovieById(movieId);
     
     if (!movieData) {
@@ -419,7 +430,8 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
         value: `${r.score}/${r.outOf}`
       })),
       releaseYear: new Date(movieData.releaseDate).getFullYear().toString(),
-      director: movieData.director
+      director: movieData.director,
+      actors: movieData.cast
     });
 
     return {
@@ -510,6 +522,35 @@ export const unsaveMovie = async (movieId: number): Promise<number[]> => {
 };
 
 export const searchMovies = async (query: string): Promise<Movie[]> => {
+  try {
+    // Try to search with OMDB
+    const omdbResults = await searchOMDBMovies(query);
+    
+    if (omdbResults.Response === 'True' && omdbResults.Search && omdbResults.Search.length > 0) {
+      // Map OMDB search results to our Movie type
+      const movies = omdbResults.Search.map((item: any) => ({
+        id: parseInt(item.imdbID.replace('tt', ''), 10) || Math.floor(Math.random() * 10000),
+        title: item.Title,
+        overview: 'Plot details available on the movie page',
+        posterPath: item.Poster !== 'N/A' ? item.Poster : 'https://image.tmdb.org/t/p/w500/placeholder.svg',
+        backdropPath: 'https://image.tmdb.org/t/p/original/placeholder.svg',
+        releaseDate: item.Year,
+        voteAverage: 0, // OMDB search doesn't include ratings
+        genres: [],
+        runtime: undefined,
+        director: undefined,
+        cast: undefined,
+        platforms: [],
+        platformRatings: []
+      }));
+      
+      return movies;
+    }
+  } catch (error) {
+    console.error('Error searching OMDB movies:', error);
+  }
+  
+  // If OMDB search fails or returns no results, fall back to mock search
   // First check mock movies
   const mockResults = mockMovies.filter(movie => 
     movie.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -517,9 +558,7 @@ export const searchMovies = async (query: string): Promise<Movie[]> => {
   );
   
   if (mockResults.length > 0) {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(mockResults), 500);
-    });
+    return mockResults;
   }
   
   // If no matching movies in our mock DB, generate a fake movie with the search term
@@ -542,7 +581,5 @@ export const searchMovies = async (query: string): Promise<Movie[]> => {
     ]
   };
   
-  return new Promise((resolve) => {
-    setTimeout(() => resolve([generatedMovie]), 800);
-  });
+  return [generatedMovie];
 };
