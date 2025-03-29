@@ -21,7 +21,12 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
       throw new Error('Movie not found');
     }
     
-    // Generate AI review using Gemini
+    // Try to get from mock data first
+    if (!forceRefresh && mockAIReviews[movieId]) {
+      return mockAIReviews[movieId];
+    }
+    
+    // Generate AI review using Gemini (which now falls back to mock data)
     const aiReview = await generateAIReview(movieData.title, {
       plot: movieData.overview,
       genres: movieData.genres,

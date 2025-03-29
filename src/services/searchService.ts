@@ -1,39 +1,9 @@
 
 import { Movie } from "@/types/movie";
-import { searchOMDBMovies } from "./omdbService";
 import { mockMovies } from "./mock/mockData";
 
 export const searchMovies = async (query: string): Promise<Movie[]> => {
-  try {
-    // Try to search with OMDB
-    const omdbResults = await searchOMDBMovies(query);
-    
-    if (omdbResults.Response === 'True' && omdbResults.Search && omdbResults.Search.length > 0) {
-      // Map OMDB search results to our Movie type
-      const movies = omdbResults.Search.map((item: any) => ({
-        id: parseInt(item.imdbID.replace('tt', ''), 10) || Math.floor(Math.random() * 10000),
-        title: item.Title,
-        overview: 'Plot details available on the movie page',
-        posterPath: item.Poster !== 'N/A' ? item.Poster : 'https://image.tmdb.org/t/p/w500/placeholder.svg',
-        backdropPath: 'https://image.tmdb.org/t/p/original/placeholder.svg',
-        releaseDate: item.Year,
-        voteAverage: 0, // OMDB search doesn't include ratings
-        genres: [],
-        runtime: undefined,
-        director: undefined,
-        cast: undefined,
-        platforms: [],
-        platformRatings: []
-      }));
-      
-      return movies;
-    }
-  } catch (error) {
-    console.error('Error searching OMDB movies:', error);
-  }
-  
-  // If OMDB search fails or returns no results, fall back to mock search
-  // First check mock movies
+  // Search mock movies
   const mockResults = mockMovies.filter(movie => 
     movie.title.toLowerCase().includes(query.toLowerCase()) ||
     movie.overview.toLowerCase().includes(query.toLowerCase())
