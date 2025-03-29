@@ -1,20 +1,26 @@
 
 import { Movie } from "@/types/movie";
+import { getMovieDetailsOmdb } from "./omdbService";
 import { mockMovies } from "./mock/mockData";
 
 export const getMovieDetails = async (imdbId: string): Promise<Movie> => {
   try {
-    // Convert imdbId format to a number (removing 'tt' prefix)
-    const numericId = parseInt(imdbId.replace('tt', ''), 10);
+    // Try to get movie details from OMDB API
+    const movie = await getMovieDetailsOmdb(imdbId);
     
-    // Look for the movie in mock data
+    if (movie) {
+      return movie;
+    }
+    
+    // If OMDB failed or returned nothing, look in mock data
+    const numericId = parseInt(imdbId.replace('tt', ''), 10);
     const foundMovie = mockMovies.find(movie => movie.id === numericId);
     
     if (foundMovie) {
       return foundMovie;
     }
     
-    // If not found, return a generated placeholder movie
+    // If not found in mock data either, return a generated placeholder movie
     return {
       id: numericId || Math.floor(Math.random() * 10000),
       title: `Movie ${imdbId}`,
