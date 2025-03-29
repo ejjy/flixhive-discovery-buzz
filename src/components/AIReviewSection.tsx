@@ -38,7 +38,8 @@ const AIReviewSection: React.FC<AIReviewSectionProps> = ({ movie }) => {
         });
       }
       
-      const reviewData = await getAIReview(movie.id, forceRefresh);
+      // Fixed here: getAIReview should only take one parameter
+      const reviewData = await getAIReview(movie.id);
       setAiReview(reviewData);
       
       // Check if this is a mock review

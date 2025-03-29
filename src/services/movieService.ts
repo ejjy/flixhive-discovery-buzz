@@ -334,7 +334,7 @@ export const getMovieDetails = async (movieId: number): Promise<Movie> => {
       cast: tmdbData.credits.cast.slice(0, 5).map((c: { name: string }) => c.name),
       platforms: [], // This would require additional API for streaming availability
       platformRatings: [
-        { platform: 'IMDB', score: parseFloat(omdbData.imdbRating), outOf: 10 },
+        { platform: 'IMDb', score: parseFloat(omdbData.imdbRating), outOf: 10 },
         { platform: 'Rotten Tomatoes', score: parseInt(omdbData.Ratings?.find((r: { Source: string }) => r.Source === 'Rotten Tomatoes')?.Value || '0'), outOf: 100 },
         { platform: 'Metacritic', score: parseInt(omdbData.Ratings?.find((r: { Source: string }) => r.Source === 'Metacritic')?.Value || '0'), outOf: 100 }
       ]
@@ -401,10 +401,14 @@ export const getMovieReviews = async (movieId: number): Promise<Review[]> => {
   });
 };
 
-export const getAIReview = async (movieId: number): Promise<AIReview> => {
+export const getAIReview = async (movieId: number, forceRefresh = false): Promise<AIReview> => {
   try {
     // Get combined movie data first
-    const movieData = await getMovieDetails(movieId);
+    const movieData = await getMovieById(movieId);
+    
+    if (!movieData) {
+      throw new Error('Movie not found');
+    }
     
     // Generate AI review using Gemini
     const aiReview = await generateAIReview(movieData.title, {

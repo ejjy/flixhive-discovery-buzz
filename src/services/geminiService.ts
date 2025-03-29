@@ -36,25 +36,44 @@ export const generateAIReview = async (
     }
   `;
 
-  const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_CONFIG.gemini.apiKey}`
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: prompt
+  // Check if API keys are configured
+  if (!API_CONFIG.gemini.projectId || !API_CONFIG.gemini.apiKey) {
+    throw new Error('Gemini API credentials not configured');
+  }
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/projects/${API_CONFIG.gemini.projectId}/locations/us-central1/models/gemini-pro:generateContent`, 
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': API_CONFIG.gemini.apiKey
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
         }]
-      }]
-    })
-  });
+      })
+    }
+  );
 
   if (!response.ok) {
-    throw new Error('Failed to generate AI review');
+    const errorData = await response.json().catch(() => ({}));
+    console.error('Gemini API error:', errorData);
+    throw new Error(`Failed to generate AI review: ${response.status}`);
   }
 
   const data = await response.json();
-  return JSON.parse(data.candidates[0].content.parts[0].text);
+  
+  try {
+    // Extract the text content from the response
+    const textContent = data.candidates[0].content.parts[0].text;
+    // Parse the JSON string
+    return JSON.parse(textContent);
+  } catch (error) {
+    console.error('Error parsing Gemini response:', error);
+    throw new Error('Failed to parse Gemini response');
+  }
 };
