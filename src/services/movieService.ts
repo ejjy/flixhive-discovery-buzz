@@ -1,5 +1,7 @@
 import { Movie, Review, AIReview } from "@/types/movie";
-import { generateMovieReviewWithAI } from "@/utils/openaiService";
+import { getTMDBMovieDetails, searchTMDBMovies } from "./tmdbService";
+import { getOMDBMovieDetails, searchOMDBMovies } from "./omdbService";
+import { generateAIReview } from "./geminiService";
 
 // Mock movie data
 const mockMovies: Movie[] = [
@@ -309,6 +311,42 @@ const mockAIReviews: { [key: number]: AIReview } = {
 };
 
 // Service functions
+export const getMovieDetails = async (movieId: number): Promise<Movie> => {
+  try {
+    // Get TMDB details first
+    const tmdbData = await getTMDBMovieDetails(movieId.toString());
+    
+    // Get OMDB details using IMDB ID from TMDB data
+    const omdbData = await getOMDBMovieDetails(tmdbData.imdb_id);
+    
+    // Combine the data from both APIs
+    const movieData = {
+      id: tmdbData.id,
+      title: tmdbData.title,
+      overview: tmdbData.overview,
+      posterPath: tmdbData.poster_path,
+      backdropPath: tmdbData.backdrop_path,
+      releaseDate: tmdbData.release_date,
+      voteAverage: tmdbData.vote_average,
+      genres: tmdbData.genres.map((g: { name: string }) => g.name),
+      runtime: tmdbData.runtime,
+      director: tmdbData.credits.crew.find((c: { job: string }) => c.job === 'Director')?.name,
+      cast: tmdbData.credits.cast.slice(0, 5).map((c: { name: string }) => c.name),
+      platforms: [], // This would require additional API for streaming availability
+      platformRatings: [
+        { platform: 'IMDB', score: parseFloat(omdbData.imdbRating), outOf: 10 },
+        { platform: 'Rotten Tomatoes', score: parseInt(omdbData.Ratings?.find((r: { Source: string }) => r.Source === 'Rotten Tomatoes')?.Value || '0'), outOf: 100 },
+        { platform: 'Metacritic', score: parseInt(omdbData.Ratings?.find((r: { Source: string }) => r.Source === 'Metacritic')?.Value || '0'), outOf: 100 }
+      ]
+    };
+
+    return movieData;
+  } catch (error) {
+    console.error('Error fetching movie details:', error);
+    throw error;
+  }
+};
+
 export const getTopMovies = async (): Promise<Movie[]> => {
   // Simulate API call delay
   return new Promise((resolve) => {
@@ -363,112 +401,78 @@ export const getMovieReviews = async (movieId: number): Promise<Review[]> => {
   });
 };
 
-export const getAIReview = async (movieId: number, forceRefresh = false): Promise<AIReview | undefined> => {
-  // If refresh is forced, always generate a new review
-  if (forceRefresh) {
-    console.log(`Force refreshing AI review for movie ID: ${movieId}`);
-    return generateAIReview(movieId);
-  }
-  
-  // For existing movies in our mock database, return the pre-defined review
-  if (mockAIReviews[movieId] && !forceRefresh) {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(mockAIReviews[movieId]), 1000);
-    });
-  }
-  
-  // For new movies, generate a review dynamically using OpenAI
-  return generateAIReview(movieId);
-};
-
-export const generateAIReview = async (movieId: number): Promise<AIReview> => {
+export const getAIReview = async (movieId: number): Promise<AIReview> => {
   try {
-    // Get the movie details first
-    const movie = await getMovieById(movieId);
+    // Get combined movie data first
+    const movieData = await getMovieDetails(movieId);
     
-    if (!movie) {
-      console.error("Movie not found for ID:", movieId);
-      throw new Error("Movie not found");
-    }
-    
-    console.log(`Generating AI review for: ${movie.title} (ID: ${movieId})`);
-    
-    try {
-      // Call the OpenAI API to generate a review
-      const aiReviewContent = await generateMovieReviewWithAI(
-        movie.title,
-        movie.overview, 
-        movie.genres
-      );
-      
-      console.log("Successfully generated AI review for:", movie.title);
-      return aiReviewContent;
-    } catch (aiError) {
-      console.error(`Error generating AI review for "${movie.title}":`, aiError);
-      
-      // Return a fallback review that indicates there was an issue
-      return {
-        summary: `We couldn't generate a complete AI review for ${movie.title} at this time.`,
-        pros: ["The film has received attention from critics and audiences"],
-        cons: ["Limited information is available for a complete analysis"],
-        watchRecommendation: "Consider checking critic and user reviews before watching",
-        error: true,
-        errorMessage: (aiError as Error).message
-      };
-    }
-  } catch (error) {
-    console.error("Error in generateAIReview:", error);
-    // Return a fallback review if something goes wrong
+    // Generate AI review using Gemini
+    const aiReview = await generateAIReview(movieData.title, {
+      plot: movieData.overview,
+      genres: movieData.genres,
+      ratings: movieData.platformRatings.map(r => ({
+        source: r.platform,
+        value: `${r.score}/${r.outOf}`
+      })),
+      releaseYear: new Date(movieData.releaseDate).getFullYear().toString(),
+      director: movieData.director
+    });
+
     return {
-      summary: "We couldn't generate a complete AI review for this movie at this time.",
-      pros: ["The film has received attention from critics and audiences"],
-      cons: ["Limited information is available for a complete analysis"],
-      watchRecommendation: "Consider checking critic and user reviews before watching",
-      error: true,
-      errorMessage: error instanceof Error ? error.message : "Unknown error"
+      ...aiReview,
+      ottPopularity: [] // This would require additional streaming platform API
     };
+  } catch (error) {
+    console.error('Error generating AI review:', error);
+    return getMockReview(movieId);
   }
 };
 
-// Modified simulated review generation to include OTT data
-const generateSimulatedReview = (movie: Movie): AIReview => {
-  const ottPlatforms = ["Netflix", "Disney+", "Prime Video", "HBO Max", "Hulu", "Apple TV+"];
-  const randomPlatforms = [...ottPlatforms].sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 3) + 1);
-  
-  const ottPopularity = randomPlatforms.map(platform => {
-    const isTrending = Math.random() > 0.5;
-    const hasRank = Math.random() > 0.7;
-    const rank = hasRank ? Math.floor(Math.random() * 10) + 1 : undefined;
-    
-    return {
-      platform,
-      rank,
-      trending: isTrending,
-      note: isTrending 
-        ? `${rank ? `Currently #${rank}` : 'Trending'} on ${platform}` 
-        : `Available on ${platform}`
-    };
-  });
-
+// Helper function for getting a mock review when API key is not configured
+function getMockReview(movieId: number): AIReview {
   return {
-    summary: `${movie.title} is a ${movie.voteAverage > 7.5 ? 'compelling' : 'mixed'} ${movie.genres.join('/')} film that ${movie.voteAverage > 7 ? 'captivates audiences' : 'offers some entertainment value'} with its ${movie.voteAverage > 7 ? 'strong' : 'moderate'} storytelling and ${movie.voteAverage > 7.5 ? 'exceptional' : 'decent'} performances.`,
+    summary: `This is a mock review for movie ID ${movieId} as the API keys are not configured. Please set the API keys in your environment variables to get real AI reviews.`,
     pros: [
-      `${movie.genres[0]} elements are well-executed`,
-      `Strong visual direction and cinematography`,
-      movie.voteAverage > 7.5 ? 'Outstanding performances from the cast' : 'Solid acting from the main characters',
-      `Engaging ${movie.genres.includes('Action') ? 'action sequences' : 'narrative pacing'}`
+      "This is a mock pro point (API keys not configured)",
+      "To get real AI reviews, add your API keys",
+      "Set API keys in environment variables",
+      "The app works without API keys, but with mock reviews"
     ],
     cons: [
-      movie.voteAverage < 8 ? 'Some pacing issues in the middle act' : 'Minor plot inconsistencies',
-      'May not appeal to viewers unfamiliar with the genre',
-      movie.voteAverage < 7.5 ? 'Character development feels rushed at times' : 'A few underdeveloped supporting characters'
+      "This review is not generated by AI (missing API keys)",
+      "Content is generic and not specific to the movie",
+      "You're missing out on customized AI insights"
     ],
-    watchRecommendation: movie.voteAverage > 7.5 
-      ? `A must-watch for fans of ${movie.genres.join(' and ')} that delivers on all fronts` 
-      : `Worth watching for ${movie.genres.join(' and ')} enthusiasts, though it may not appeal to everyone`,
-    ottPopularity
+    watchRecommendation: "To get a real recommendation, please configure your API keys in the environment variables.",
+    ottPopularity: [
+      {
+        platform: "Mock Platform",
+        trending: true,
+        note: "This is mock OTT popularity data (API keys not configured)"
+      }
+    ]
   };
-};
+}
+
+// Helper function for fallback review when API call fails
+function getFallbackReview(movieTitle: string): AIReview {
+  return {
+    summary: `We couldn't generate a complete AI review for "${movieTitle}" at this time. This may be due to API limitations or connectivity issues.`,
+    pros: [
+      "The film has received attention from critics and audiences",
+      "Movie information is available in our database",
+      "You can still explore other reviews and information about this film",
+      "Try searching for more specific details about the movie"
+    ],
+    cons: [
+      "Limited information is available for a complete AI analysis",
+      "Our AI review generation encountered technical difficulties",
+      "You may want to check other sources for comprehensive reviews"
+    ],
+    watchRecommendation: "Consider checking critic and user reviews before watching this movie.",
+    ottPopularity: []
+  };
+}
 
 const savedMovies: number[] = [];
 
