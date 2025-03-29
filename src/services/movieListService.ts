@@ -1,6 +1,6 @@
 
-import { Movie } from "@/types/movie";
-import { mockMovies, mockAIReviews } from "./mock/mockData";
+import { Movie, Review } from "@/types/movie";
+import { mockMovies, mockAIReviews, mockReviews } from "./mock/mockData";
 
 export const getTopMovies = async (): Promise<Movie[]> => {
   // Simulate API call delay
@@ -14,7 +14,7 @@ export const getTrendingMovies = async (): Promise<Movie[]> => {
   // This simulates getting trend data from real OTT platforms
   return new Promise((resolve) => {
     setTimeout(() => {
-      // Create a scoring system based on mock OTT popularity data
+      // Calculate OTT popularity score based on trending status and rank
       const moviesWithScores = mockMovies.map(movie => {
         const aiReview = mockAIReviews[movie.id];
         let ottScore = 0;
@@ -49,13 +49,5 @@ export const getMovieById = async (id: number): Promise<Movie | undefined> => {
   });
 };
 
-export const getMovieReviews = async (movieId: number): Promise<Review[]> => {
-  // Import needed here to avoid circular dependencies
-  import { Review } from "@/types/movie";
-  import { mockReviews } from "./mock/mockData";
-  
-  // Simulate API call delay
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(mockReviews[movieId] || []), 600);
-  });
-};
+// Move the getMovieReviews function to reviewService.ts as it's already implemented there
+// This function was duplicated and is no longer needed here
