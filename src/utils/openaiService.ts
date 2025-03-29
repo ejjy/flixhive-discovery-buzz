@@ -1,4 +1,3 @@
-
 // We'll use a different AI model approach - using PerplexityAI instead of OpenAI
 
 export interface AIReviewContent {
@@ -29,7 +28,7 @@ export async function generateMovieReviewWithAI(
   console.log(`Starting AI review generation for: ${movieTitle}`);
   
   if (!isApiKeyConfigured()) {
-    console.log("Perplexity API key is not set - returning mock review");
+    console.error("Perplexity API key not configured");
     return getMockReview(movieTitle);
   }
 
