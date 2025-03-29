@@ -29,7 +29,7 @@ export const generateAIReview = async (
     // Generate a random ID for the mock review
     const mockId = Math.floor(Math.random() * 10000);
     
-    // Return a mock review with the movie title included
-    return getMockReview(mockId, movieTitle);
+    // Return a mock review (removing the second argument)
+    return getMockReview(mockId);
   }
 };
