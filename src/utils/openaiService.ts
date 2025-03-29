@@ -1,5 +1,5 @@
 
-// We'll avoid directly referencing the API key in the code
+// We'll use a different AI model approach - using PerplexityAI instead of OpenAI
 
 export interface AIReviewContent {
   summary: string;
@@ -16,7 +16,7 @@ export interface AIReviewContent {
 
 // Check if the API key is configured
 const isApiKeyConfigured = (): boolean => {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  const apiKey = import.meta.env.VITE_PERPLEXITY_API_KEY;
   return !!apiKey && 
          apiKey !== 'placeholder_value_replace_in_netlify';
 };
@@ -29,7 +29,7 @@ export async function generateMovieReviewWithAI(
   console.log(`Starting AI review generation for: ${movieTitle}`);
   
   if (!isApiKeyConfigured()) {
-    console.log("OpenAI API key is not set - returning mock review");
+    console.log("Perplexity API key is not set - returning mock review");
     return getMockReview(movieTitle);
   }
 
@@ -65,7 +65,7 @@ Write a review in this specific JSON format:
 Return ONLY the JSON with no additional text or explanation.
 `;
 
-    console.log("Sending request to OpenAI API for movie:", movieTitle);
+    console.log("Sending request to Perplexity API for movie:", movieTitle);
     
     // Create a dynamic object for headers to avoid the key being included directly in the build
     const headers: Record<string, string> = {
@@ -73,36 +73,47 @@ Return ONLY the JSON with no additional text or explanation.
     };
     
     // Add the authorization header dynamically
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    const apiKey = import.meta.env.VITE_PERPLEXITY_API_KEY;
     if (apiKey) {
       headers["Authorization"] = `Bearer ${apiKey}`;
     }
     
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
       headers,
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "llama-3.1-sonar-small-128k-online",
         messages: [
+          {
+            role: "system",
+            content: "You are a film critic AI that provides detailed and accurate movie reviews based on available online information. Always return responses in valid JSON format."
+          },
           {
             role: "user",
             content: promptContent,
           },
         ],
-        temperature: 0.7,
+        temperature: 0.2,
+        top_p: 0.9,
         max_tokens: 1000,
+        return_images: false,
+        return_related_questions: false,
+        search_domain_filter: ["perplexity.ai"],
+        search_recency_filter: "month",
+        frequency_penalty: 1,
+        presence_penalty: 0
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("OpenAI API error:", errorData);
+      console.error("Perplexity API error:", errorData);
       console.error(`Status: ${response.status}, Status Text: ${response.statusText}`);
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+      throw new Error(`Perplexity API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    console.log("OpenAI API response received:", data);
+    console.log("Perplexity API response received:", data);
     
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
       console.error("Unexpected API response format:", data);
@@ -154,11 +165,11 @@ Return ONLY the JSON with no additional text or explanation.
 // Helper function for getting a mock review when API key is not configured
 function getMockReview(movieTitle: string): AIReviewContent {
   return {
-    summary: `This is a mock review for "${movieTitle}" as no OpenAI API key is configured. Please set the VITE_OPENAI_API_KEY in your Netlify environment variables to get real AI reviews.`,
+    summary: `This is a mock review for "${movieTitle}" as no Perplexity API key is configured. Please set the VITE_PERPLEXITY_API_KEY in your Netlify environment variables to get real AI reviews.`,
     pros: [
       "This is a mock pro point (API key not configured)",
-      "To get real AI reviews, add your OpenAI API key",
-      "Set VITE_OPENAI_API_KEY in Netlify environment variables",
+      "To get real AI reviews, add your Perplexity API key",
+      "Set VITE_PERPLEXITY_API_KEY in Netlify environment variables",
       "The app works without an API key, but with mock reviews"
     ],
     cons: [
@@ -166,7 +177,7 @@ function getMockReview(movieTitle: string): AIReviewContent {
       "Content is generic and not specific to the movie",
       "You're missing out on customized AI insights"
     ],
-    watchRecommendation: "To get a real recommendation, please configure your OpenAI API key in the Netlify environment variables.",
+    watchRecommendation: "To get a real recommendation, please configure your Perplexity API key in the Netlify environment variables.",
     ottPopularity: [
       {
         platform: "Mock Platform",

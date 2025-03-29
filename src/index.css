@@ -5,44 +5,44 @@
 
 @layer base {
   :root {
-    --background: 250 30% 10%;
-    --foreground: 250 10% 95%;
+    --background: 215 30% 95%;
+    --foreground: 215 30% 15%;
 
-    --card: 250 25% 12%;
-    --card-foreground: 250 10% 95%;
+    --card: 215 25% 90%;
+    --card-foreground: 215 30% 15%;
 
-    --popover: 250 30% 10%;
-    --popover-foreground: 250 10% 95%;
+    --popover: 215 30% 95%;
+    --popover-foreground: 215 30% 15%;
 
-    --primary: 272 70% 50%;
+    --primary: 225 70% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 270 68% 35%;
+    --secondary: 215 68% 40%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 250 20% 20%;
-    --muted-foreground: 250 10% 70%;
+    --muted: 215 20% 80%;
+    --muted-foreground: 215 10% 40%;
 
-    --accent: 346 83% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 38 83% 60%;
+    --accent-foreground: 215 30% 15%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 250 20% 18%;
-    --input: 250 20% 18%;
-    --ring: 346 83% 60%;
+    --border: 215 20% 80%;
+    --input: 215 20% 80%;
+    --ring: 38 83% 60%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 250 30% 12%;
-    --sidebar-foreground: 250 10% 95%;
-    --sidebar-primary: 272 70% 50%;
+    --sidebar-background: 215 30% 90%;
+    --sidebar-foreground: 215 30% 15%;
+    --sidebar-primary: 225 70% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 250 25% 15%;
-    --sidebar-accent-foreground: 250 10% 95%;
-    --sidebar-border: 250 25% 18%;
-    --sidebar-ring: 272 70% 50%;
+    --sidebar-accent: 215 25% 85%;
+    --sidebar-accent-foreground: 215 30% 15%;
+    --sidebar-border: 215 25% 80%;
+    --sidebar-ring: 225 70% 60%;
   }
 }
 
@@ -74,14 +74,24 @@
   }
   
   .btn-primary {
-    @apply bg-flixhive-primary hover:bg-flixhive-light text-white font-semibold py-2 px-4 rounded-lg transition-colors;
+    @apply bg-primary hover:bg-primary/90 text-white font-semibold py-2 px-4 rounded-lg transition-colors;
   }
   
   .btn-secondary {
-    @apply bg-flixhive-secondary hover:bg-flixhive-dark text-white font-semibold py-2 px-4 rounded-lg transition-colors;
+    @apply bg-secondary hover:bg-secondary/90 text-white font-semibold py-2 px-4 rounded-lg transition-colors;
   }
   
   .btn-accent {
-    @apply bg-flixhive-accent hover:bg-opacity-90 text-white font-semibold py-2 px-4 rounded-lg transition-colors;
+    @apply bg-accent hover:bg-opacity-90 text-accent-foreground font-semibold py-2 px-4 rounded-lg transition-colors;
+  }
+
+  /* Custom FlixHive color theme */
+  .flixhive-theme {
+    --flixhive-primary: theme('colors.blue.600');
+    --flixhive-light: theme('colors.blue.500');
+    --flixhive-secondary: theme('colors.indigo.700');
+    --flixhive-dark: theme('colors.indigo.900');
+    --flixhive-accent: theme('colors.amber.500');
+    --flixhive-gray: theme('colors.slate.800');
   }
 }
