@@ -44,7 +44,7 @@ const Landing = () => {
         </div>
         
         <h2 className="text-xl md:text-2xl text-white/90 mb-6 max-w-2xl relative z-10">
-          AI-Powered Movie Reviews and Recommendations
+          Find out what to watch, with the best reviews and ratings
         </h2>
         
         <p className="text-white/80 mb-12 max-w-xl relative z-10">
