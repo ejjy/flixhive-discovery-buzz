@@ -4,6 +4,7 @@ import { Movie } from '@/types/movie';
 import { getAIReview } from '@/services/movieService';
 import { useToast } from '@/components/ui/use-toast';
 import { areApiKeysConfigured } from '@/config/api';
+import { API_CONFIG } from '@/config/api';
 
 export const useAIReview = (movie: Movie) => {
   const { toast } = useToast();
@@ -12,6 +13,28 @@ export const useAIReview = (movie: Movie) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isMockReview, setIsMockReview] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [apiKeyState, setApiKeyState] = useState({
+    configured: false,
+    key: ''
+  });
+
+  // Check API configuration on mount
+  useEffect(() => {
+    const configured = areApiKeysConfigured();
+    setApiKeyState({
+      configured,
+      key: API_CONFIG.gemini.apiKey || ''
+    });
+    
+    if (!configured) {
+      console.log("Gemini API key not properly configured:", 
+                 API_CONFIG.gemini.apiKey ? 
+                 `Key exists but may be invalid (length: ${API_CONFIG.gemini.apiKey.length})` : 
+                 'Key not found');
+    } else {
+      console.log("Gemini API key is configured correctly");
+    }
+  }, []);
 
   const fetchAIReview = async (forceRefresh = false) => {
     setIsLoading(true);
@@ -21,11 +44,14 @@ export const useAIReview = (movie: Movie) => {
     
     try {
       // Check if Gemini API key is configured
-      const geminiApiKey = areApiKeysConfigured();
+      const geminiApiConfigured = areApiKeysConfigured();
+      console.log("API Keys configuration check result:", geminiApiConfigured);
+      console.log("API Key length:", API_CONFIG.gemini.apiKey?.length || 0);
       
       // If no API key is set, we know we'll get a mock review
-      if (!geminiApiKey) {
+      if (!geminiApiConfigured) {
         setIsMockReview(true);
+        console.log("Setting to mock review due to missing API key");
       }
       
       // Check if it's a newly discovered movie (ID > 1000) or forced refresh
@@ -38,12 +64,13 @@ export const useAIReview = (movie: Movie) => {
         });
       }
       
+      console.log("Calling getAIReview for movie:", movie.title);
       const reviewData = await getAIReview(movie.id, forceRefresh);
       setAiReview(reviewData);
       
       // Check if this is a mock review by examining content
       if (
-        !geminiApiKey || 
+        !geminiApiConfigured || 
         (reviewData.summary && (
           reviewData.summary.includes("mock review") || 
           reviewData.summary.includes("API key is not configured") ||
@@ -54,8 +81,8 @@ export const useAIReview = (movie: Movie) => {
         setIsMockReview(true);
         console.log("Using mock review data - Gemini API key not properly configured");
         toast({
-          title: "API Key Missing",
-          description: "Using mock review data. Add Gemini API key in Netlify for real AI reviews.",
+          title: "API Key Issue",
+          description: `Using mock review data. Your Gemini API key (${API_CONFIG.gemini.apiKey?.substring(0, 3)}...) appears to be invalid or missing.`,
           variant: "destructive",
           duration: 5000,
         });
@@ -101,6 +128,7 @@ export const useAIReview = (movie: Movie) => {
     isGenerating,
     isMockReview,
     hasError,
+    apiKeyConfigured: apiKeyState.configured,
     refreshReview: () => fetchAIReview(true)
   };
 };

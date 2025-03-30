@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Film, Loader2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Film, Loader2, AlertTriangle, RefreshCw, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface AIReviewHeaderProps {
@@ -19,7 +19,7 @@ const AIReviewHeader: React.FC<AIReviewHeaderProps> = ({
   onRefresh,
 }) => {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 flex-wrap">
       <Film className="h-8 w-8 text-flixhive-accent" />
       <h2 className="text-2xl font-bold">{title} - AI Review</h2>
       {isGenerating && (
@@ -30,8 +30,8 @@ const AIReviewHeader: React.FC<AIReviewHeaderProps> = ({
       )}
       {isMockReview && (
         <div className="ml-auto flex items-center gap-2 text-yellow-500">
-          <AlertTriangle className="h-4 w-4" />
-          <span className="text-sm">Mock Review (API key not set)</span>
+          <Key className="h-4 w-4" />
+          <span className="text-sm">Mock Review (Check Gemini API key in Netlify)</span>
         </div>
       )}
       {hasError && (

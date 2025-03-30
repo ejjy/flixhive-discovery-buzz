@@ -15,15 +15,19 @@ export const getMovieReviews = async (movieId: number): Promise<Review[]> => {
 
 export const getAIReview = async (movieId: number, forceRefresh = false): Promise<AIReview> => {
   try {
+    console.log("getAIReview called for movie ID:", movieId, "forceRefresh:", forceRefresh);
+    
     // Get movie data first
     const movieData = await getMovieById(movieId);
     
     if (!movieData) {
+      console.error('Movie not found');
       throw new Error('Movie not found');
     }
     
     // Check if Gemini API key is configured
     const geminiApiConfigured = areApiKeysConfigured();
+    console.log("Gemini API configured:", geminiApiConfigured);
     
     // Try to get from mock data first (if not forcing refresh and mock data exists)
     if (!forceRefresh && !geminiApiConfigured && mockAIReviews[movieId]) {
@@ -37,7 +41,7 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
       
       try {
         // Use Gemini API for review generation
-        return await generateAIReview(movieData.title, {
+        const review = await generateAIReview(movieData.title, {
           plot: movieData.overview,
           genres: movieData.genres,
           ratings: movieData.platformRatings.map(r => ({
@@ -48,6 +52,9 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
           director: movieData.director,
           actors: movieData.cast
         });
+        
+        console.log("AI review generation successful");
+        return review;
       } catch (geminiError) {
         console.error("Gemini API failed:", geminiError);
         throw new Error("Gemini API failed to generate review");

@@ -1,6 +1,7 @@
 
 import { API_CONFIG } from '@/config/api';
 import { getMockReview } from './mock/mockHelpers';
+import { AIReview } from '@/types/movie';
 
 export const generateAIReview = async (
   movieTitle: string,
@@ -12,14 +13,17 @@ export const generateAIReview = async (
     director?: string;
     actors?: string[];
   }
-) => {
+): Promise<AIReview> => {
   try {
     // Check if API keys are configured
-    if (!API_CONFIG.gemini.apiKey) {
+    if (!API_CONFIG.gemini.apiKey || API_CONFIG.gemini.apiKey.length < 10) {
+      console.error('Gemini API key not properly configured');
       throw new Error('Gemini API credentials not configured');
     }
 
-    // This would be the actual API call to Gemini
+    console.log("Starting Gemini API request for movie review:", movieTitle);
+    
+    // This is the actual API call to Gemini
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_CONFIG.gemini.apiKey}`;
     
     // Format the movie data for the prompt
@@ -43,7 +47,11 @@ export const generateAIReview = async (
     3. cons: An array of 3-5 weaknesses of the movie
     4. watchRecommendation: Your final verdict on whether people should watch this movie and why
     
-    Make the review insightful, balanced, and helpful for someone deciding whether to watch the film.`;
+    Make the review insightful, balanced, and helpful for someone deciding whether to watch the film.
+    
+    Return ONLY valid JSON with no additional text, comments or markdown formatting.`;
+
+    console.log("Sending request to Gemini API with prompt length:", prompt.length);
 
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -68,9 +76,12 @@ export const generateAIReview = async (
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Gemini API failed with status: ${response.status}`, errorText);
       throw new Error(`Gemini API failed with status: ${response.status}`);
     }
 
+    console.log("Received response from Gemini API");
     const data = await response.json();
     
     // Parse the response to extract the JSON content
@@ -79,17 +90,25 @@ export const generateAIReview = async (
       const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (!textContent) {
+        console.error('Invalid response format from Gemini API', data);
         throw new Error('Invalid response format from Gemini API');
       }
       
-      // Extract the JSON content from the text (it might be wrapped in ```json blocks)
-      const jsonMatch = textContent.match(/```json\n([\s\S]*?)\n```/) || 
-                        textContent.match(/```\n([\s\S]*?)\n```/) ||
-                        [null, textContent];
+      console.log("Raw Gemini response:", textContent.substring(0, 100) + "...");
       
-      const jsonContent = jsonMatch[1] || textContent;
+      // Extract the JSON content from the text (it might be wrapped in ```json blocks)
+      let jsonContent = textContent;
+      const jsonMatch = textContent.match(/```json\n([\s\S]*?)\n```/) || 
+                        textContent.match(/```\n([\s\S]*?)\n```/);
+      
+      if (jsonMatch && jsonMatch[1]) {
+        jsonContent = jsonMatch[1];
+      }
+      
+      console.log("Attempting to parse JSON response");
       const parsedReview = JSON.parse(jsonContent.trim());
       
+      console.log("Successfully parsed Gemini response into JSON");
       return {
         summary: parsedReview.summary || "Couldn't generate a proper summary.",
         pros: parsedReview.pros || ["Interesting performances", "Unique visual style", "Engaging story"],
@@ -99,11 +118,12 @@ export const generateAIReview = async (
       };
     } catch (parseError) {
       console.error('Error parsing Gemini response:', parseError);
+      console.error('Raw response text:', data.candidates?.[0]?.content?.parts?.[0]?.text);
       throw new Error('Failed to parse AI review response');
     }
     
   } catch (error) {
-    console.log('Using mock AI review data instead of Gemini API:', error);
+    console.error('Error using Gemini API:', error);
     
     // Generate a random ID for the mock review
     const mockId = Math.floor(Math.random() * 10000);
