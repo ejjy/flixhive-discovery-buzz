@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/navbar';
 import { MessageSquare, Star, Film, PenLine } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';

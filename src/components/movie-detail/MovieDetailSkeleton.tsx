@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/navbar';
 
 const MovieDetailSkeleton: React.FC = () => {
   return (
