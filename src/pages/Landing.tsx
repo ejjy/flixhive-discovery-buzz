@@ -90,7 +90,7 @@ const Landing = () => {
       
       {/* Footer */}
       <footer className="py-6 bg-indigo-950 text-center text-white/60">
-        <p>© 2024 FlixHive - All rights reserved</p>
+        <p>© 2025 <a href="https://www.flixhive.in" className="hover:text-amber-400 transition-colors">www.flixhive.in</a> - PineGrass Tech</p>
       </footer>
     </div>
   );
