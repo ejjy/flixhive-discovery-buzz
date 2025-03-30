@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Movie } from '@/types/movie';
 import { getAIReview } from '@/services/movieService';
 import { useToast } from '@/components/ui/use-toast';
+import { areApiKeysConfigured } from '@/config/api';
 
 export const useAIReview = (movie: Movie) => {
   const { toast } = useToast();
@@ -19,6 +20,14 @@ export const useAIReview = (movie: Movie) => {
     setHasError(false);
     
     try {
+      // Check if API keys are configured
+      const apiKeysSet = areApiKeysConfigured();
+      
+      // If no API keys are set, we know we'll get a mock review
+      if (!apiKeysSet) {
+        setIsMockReview(true);
+      }
+      
       // Check if it's a newly discovered movie (ID > 1000) or forced refresh
       if (movie.id > 1000 || forceRefresh) {
         setIsGenerating(true);
@@ -29,19 +38,24 @@ export const useAIReview = (movie: Movie) => {
         });
       }
       
-      const reviewData = await getAIReview(movie.id);
+      const reviewData = await getAIReview(movie.id, forceRefresh);
       setAiReview(reviewData);
       
-      // Check if this is a mock review
-      if (reviewData.summary && (
+      // Check if this is a mock review by examining content
+      if (
+        !apiKeysSet || 
+        (reviewData.summary && (
           reviewData.summary.includes("mock review") || 
           reviewData.summary.includes("API key is not configured") ||
-          reviewData.summary.includes("API key not set")
-        )) {
+          reviewData.summary.includes("API key not set") ||
+          reviewData.summary.includes("API keys are not configured")
+        ))
+      ) {
         setIsMockReview(true);
+        console.log("Using mock review data - API keys not properly configured");
         toast({
           title: "API Key Missing",
-          description: "Using mock review data. Add OpenAI API key in Netlify for real AI reviews.",
+          description: "Using mock review data. Add Gemini or Perplexity API key in Netlify for real AI reviews.",
           variant: "destructive",
           duration: 5000,
         });

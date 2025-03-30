@@ -28,7 +28,7 @@ const AIReviewFooter: React.FC<AIReviewFooterProps> = ({
       <div className="mt-4 text-xs text-white/40 flex items-center gap-1">
         <BookOpen className="h-3 w-3" />
         {isMockReview ? (
-          <span>This is a mock review. Configure OpenAI API key in Netlify for real AI reviews.</span>
+          <span>This is a mock review. Configure Gemini or Perplexity API key in Netlify for real AI reviews.</span>
         ) : hasError ? (
           <span>Generated with limited information. Try refreshing for a better review.</span>
         ) : isNewDiscovery ? (
