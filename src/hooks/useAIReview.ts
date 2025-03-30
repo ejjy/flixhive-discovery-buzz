@@ -20,11 +20,11 @@ export const useAIReview = (movie: Movie) => {
     setHasError(false);
     
     try {
-      // Check if API keys are configured
-      const apiKeysSet = areApiKeysConfigured();
+      // Check if Gemini API key is configured
+      const geminiApiKey = areApiKeysConfigured();
       
-      // If no API keys are set, we know we'll get a mock review
-      if (!apiKeysSet) {
+      // If no API key is set, we know we'll get a mock review
+      if (!geminiApiKey) {
         setIsMockReview(true);
       }
       
@@ -33,7 +33,7 @@ export const useAIReview = (movie: Movie) => {
         setIsGenerating(true);
         toast({
           title: "Generating AI Review",
-          description: `Creating a fresh review for "${movie.title}" using data from Wikipedia, IMDb, and Rotten Tomatoes...`,
+          description: `Creating a fresh review for "${movie.title}" using Gemini AI...`,
           duration: 5000,
         });
       }
@@ -43,7 +43,7 @@ export const useAIReview = (movie: Movie) => {
       
       // Check if this is a mock review by examining content
       if (
-        !apiKeysSet || 
+        !geminiApiKey || 
         (reviewData.summary && (
           reviewData.summary.includes("mock review") || 
           reviewData.summary.includes("API key is not configured") ||
@@ -52,10 +52,10 @@ export const useAIReview = (movie: Movie) => {
         ))
       ) {
         setIsMockReview(true);
-        console.log("Using mock review data - API keys not properly configured");
+        console.log("Using mock review data - Gemini API key not properly configured");
         toast({
           title: "API Key Missing",
-          description: "Using mock review data. Add Gemini or Perplexity API key in Netlify for real AI reviews.",
+          description: "Using mock review data. Add Gemini API key in Netlify for real AI reviews.",
           variant: "destructive",
           duration: 5000,
         });
@@ -70,7 +70,7 @@ export const useAIReview = (movie: Movie) => {
       } else if (movie.id > 1000 || forceRefresh) {
         toast({
           title: "AI Review Ready",
-          description: `We've created a detailed review for "${movie.title}" based on data from multiple sources`,
+          description: `We've created a detailed review for "${movie.title}" with Gemini AI`,
           duration: 3000,
         });
       }

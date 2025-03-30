@@ -5,7 +5,6 @@ import { generateAIReview } from "./geminiService";
 import { mockReviews, mockAIReviews } from "./mock/mockData";
 import { getMockReview, getFallbackReview } from "./mock/mockHelpers";
 import { areApiKeysConfigured } from "@/config/api";
-import { generateMovieReviewWithAI } from "@/utils/openaiService";
 
 export const getMovieReviews = async (movieId: number): Promise<Review[]> => {
   // Simulate API call delay
@@ -23,51 +22,40 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
       throw new Error('Movie not found');
     }
     
-    // Check if API keys are configured
-    const apiKeysConfigured = areApiKeysConfigured();
+    // Check if Gemini API key is configured
+    const geminiApiConfigured = areApiKeysConfigured();
     
     // Try to get from mock data first (if not forcing refresh and mock data exists)
-    if (!forceRefresh && !apiKeysConfigured && mockAIReviews[movieId]) {
-      console.log("Using mock review from data store (no API keys configured)");
+    if (!forceRefresh && !geminiApiConfigured && mockAIReviews[movieId]) {
+      console.log("Using mock review from data store (no Gemini API key configured)");
       return mockAIReviews[movieId];
     }
     
-    // If we have API keys or force refresh, try to generate a real review
-    if (apiKeysConfigured || forceRefresh) {
-      console.log("Attempting to generate AI review with configured API");
+    // If we have Gemini API key or force refresh, try to generate a real review
+    if (geminiApiConfigured || forceRefresh) {
+      console.log("Attempting to generate AI review with Gemini API");
       
       try {
-        // Try Perplexity API first (newer integration)
-        return await generateMovieReviewWithAI(
-          movieData.title,
-          movieData.overview,
-          movieData.genres
-        );
-      } catch (perplexityError) {
-        console.error("Perplexity API error:", perplexityError);
-        
-        // Fall back to Gemini if Perplexity fails
-        try {
-          return await generateAIReview(movieData.title, {
-            plot: movieData.overview,
-            genres: movieData.genres,
-            ratings: movieData.platformRatings.map(r => ({
-              source: r.platform,
-              value: `${r.score}/${r.outOf}`
-            })),
-            releaseYear: new Date(movieData.releaseDate).getFullYear().toString(),
-            director: movieData.director,
-            actors: movieData.cast
-          });
-        } catch (geminiError) {
-          console.error("Gemini API fallback also failed:", geminiError);
-          throw new Error("Both AI APIs failed");
-        }
+        // Use Gemini API for review generation
+        return await generateAIReview(movieData.title, {
+          plot: movieData.overview,
+          genres: movieData.genres,
+          ratings: movieData.platformRatings.map(r => ({
+            source: r.platform,
+            value: `${r.score}/${r.outOf}`
+          })),
+          releaseYear: new Date(movieData.releaseDate).getFullYear().toString(),
+          director: movieData.director,
+          actors: movieData.cast
+        });
+      } catch (geminiError) {
+        console.error("Gemini API failed:", geminiError);
+        throw new Error("Gemini API failed to generate review");
       }
     }
     
-    // If we get here, no API keys are configured and we need a mock review
-    console.log("No API keys configured, using mock review");
+    // If we get here, no API key is configured and we need a mock review
+    console.log("No Gemini API key configured, using mock review");
     return getMockReview(movieId);
     
   } catch (error) {
