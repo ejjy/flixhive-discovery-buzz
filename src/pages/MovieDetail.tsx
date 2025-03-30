@@ -1,8 +1,7 @@
-
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/navbar';
 import { getMovieById, getMovieReviews } from '@/services/movieService';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import MovieHero from '@/components/movie-detail/MovieHero';

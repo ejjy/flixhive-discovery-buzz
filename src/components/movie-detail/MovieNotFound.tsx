@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/navbar';
 import { useNavigate } from 'react-router-dom';
 
 const MovieNotFound: React.FC = () => {

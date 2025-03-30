@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/navbar';
 import FeaturedMovie from '@/components/FeaturedMovie';
 import MovieSection from '@/components/MovieSection';
 import { Skeleton } from '@/components/ui/skeleton';

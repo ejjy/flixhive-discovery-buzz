@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Film, AlertCircle } from 'lucide-react';
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/navbar';
 import MovieCard from '@/components/MovieCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';

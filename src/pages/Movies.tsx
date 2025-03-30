@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/navbar';
 import MovieCard from '@/components/MovieCard';
 import { getTopMovies } from '@/services/movieService';
 import { Skeleton } from '@/components/ui/skeleton';
