@@ -29,7 +29,7 @@ export const useAIReview = (movie: Movie) => {
     if (!configured) {
       console.log("Gemini API key not properly configured:", 
                  API_CONFIG.gemini.apiKey ? 
-                 `Key exists but may be invalid (length: ${API_CONFIG.gemini.apiKey.length})` : 
+                 `Key exists but may be invalid (length: ${API_CONFIG.gemini.apiKey.length}, starts with: ${API_CONFIG.gemini.apiKey.substring(0, 2)})` : 
                  'Key not found');
     } else {
       console.log("Gemini API key is configured correctly");
@@ -47,11 +47,12 @@ export const useAIReview = (movie: Movie) => {
       const geminiApiConfigured = areApiKeysConfigured();
       console.log("API Keys configuration check result:", geminiApiConfigured);
       console.log("API Key length:", API_CONFIG.gemini.apiKey?.length || 0);
+      console.log("API Key starts with:", API_CONFIG.gemini.apiKey?.substring(0, 2) || 'N/A');
       
       // If no API key is set, we know we'll get a mock review
       if (!geminiApiConfigured) {
         setIsMockReview(true);
-        console.log("Setting to mock review due to missing API key");
+        console.log("Setting to mock review due to missing or invalid API key");
       }
       
       // Check if it's a newly discovered movie (ID > 1000) or forced refresh
@@ -64,8 +65,9 @@ export const useAIReview = (movie: Movie) => {
         });
       }
       
-      console.log("Calling getAIReview for movie:", movie.title);
+      console.log("Calling getAIReview for movie:", movie.title, "with ID:", movie.id);
       const reviewData = await getAIReview(movie.id, forceRefresh);
+      console.log("Review data received:", reviewData ? "Success" : "Failed");
       setAiReview(reviewData);
       
       // Check if this is a mock review by examining content
@@ -82,7 +84,7 @@ export const useAIReview = (movie: Movie) => {
         console.log("Using mock review data - Gemini API key not properly configured");
         toast({
           title: "API Key Issue",
-          description: `Using mock review data. Your Gemini API key (${API_CONFIG.gemini.apiKey?.substring(0, 3)}...) appears to be invalid or missing.`,
+          description: `Using mock review data. Your Gemini API key may be invalid or missing. Make sure it starts with 'AI'.`,
           variant: "destructive",
           duration: 5000,
         });

@@ -16,12 +16,18 @@ export const generateAIReview = async (
 ): Promise<AIReview> => {
   try {
     // Check if API keys are configured
-    if (!API_CONFIG.gemini.apiKey || API_CONFIG.gemini.apiKey.length < 10) {
-      console.error('Gemini API key not properly configured');
-      throw new Error('Gemini API credentials not configured');
+    if (!API_CONFIG.gemini.apiKey || 
+        API_CONFIG.gemini.apiKey.length < 10 || 
+        !API_CONFIG.gemini.apiKey.startsWith('AI')) {
+      console.error('Gemini API key not properly configured:', 
+                   API_CONFIG.gemini.apiKey ? 
+                   `Key exists but invalid (length: ${API_CONFIG.gemini.apiKey.length}, starts with: ${API_CONFIG.gemini.apiKey.substring(0, 2)})` : 
+                   'Key not found');
+      throw new Error('Gemini API credentials not configured correctly');
     }
 
     console.log("Starting Gemini API request for movie review:", movieTitle);
+    console.log("Using Gemini API key:", `${API_CONFIG.gemini.apiKey.substring(0, 5)}...`);
     
     // This is the actual API call to Gemini
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_CONFIG.gemini.apiKey}`;

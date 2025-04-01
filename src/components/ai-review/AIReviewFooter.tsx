@@ -38,7 +38,30 @@ const AIReviewFooter: React.FC<AIReviewFooterProps> = ({
                 <li>Make sure your VITE_GEMINI_API_KEY is set in Netlify environment variables</li>
                 <li>Verify the API key is correct and valid (starts with "AI")</li>
                 <li>Redeploy your site after updating the environment variables</li>
+                <li>Check the console logs for more detailed error information</li>
               </ol>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {hasError && !isMockReview && (
+        <div className="mt-4 p-3 bg-red-900/20 border border-red-900/30 rounded-md">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
+            <div>
+              <h5 className="font-medium text-red-500">Review Generation Failed</h5>
+              <p className="text-sm text-white/70">
+                We encountered an error while generating the AI review. This could be due to:
+              </p>
+              <ul className="text-sm text-white/70 list-disc ml-5 mt-1 space-y-1">
+                <li>Temporary API service disruption</li>
+                <li>Rate limiting on the Gemini API</li>
+                <li>Network connectivity issues</li>
+              </ul>
+              <p className="text-sm text-white/70 mt-2">
+                Try refreshing the review, or check back later.
+              </p>
             </div>
           </div>
         </div>

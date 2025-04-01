@@ -67,6 +67,6 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
     
   } catch (error) {
     console.error('Error generating AI review:', error);
-    return getMockReview(movieId);
+    return getFallbackReview(movieId);
   }
 };
