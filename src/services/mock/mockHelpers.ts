@@ -2,9 +2,11 @@
 import { AIReview } from "@/types/movie";
 
 // Helper function for getting a mock review when API key is not configured
-export function getMockReview(movieId: number): AIReview {
+export function getMockReview(movieId: number | string): AIReview {
+  const movieIdStr = typeof movieId === 'number' ? movieId.toString() : movieId;
+  
   return {
-    summary: `This is a mock review for movie ID ${movieId} as the API keys are not configured. Please set the API keys in your environment variables to get real AI reviews.`,
+    summary: `This is a mock review for movie ID ${movieIdStr} as the API keys are not configured. Please set the API keys in your environment variables to get real AI reviews.`,
     pros: [
       "This is a mock pro point (API keys not configured)",
       "To get real AI reviews, add your API keys",
