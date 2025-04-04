@@ -1,6 +1,8 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useClerk, UserProfile } from '@clerk/clerk-react';
 import Navbar from '@/components/navbar';
-import { UserProfile } from '@clerk/clerk-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +16,22 @@ import {
 } from 'lucide-react';
 
 const Profile = () => {
+  const [searchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState('account');
+  const { signOut } = useClerk();
+
+  // Set the active tab based on URL parameter if it exists
+  useEffect(() => {
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]);
+
+  const handleSignOut = () => {
+    signOut();
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -26,7 +44,12 @@ const Profile = () => {
           <div className="space-y-4">
             <Card>
               <div className="p-6">
-                <Tabs defaultValue="account" className="w-full" orientation="vertical">
+                <Tabs 
+                  value={activeTab} 
+                  onValueChange={setActiveTab} 
+                  className="w-full" 
+                  orientation="vertical"
+                >
                   <TabsList className="flex flex-col h-auto bg-transparent space-y-1">
                     <TabsTrigger 
                       value="account" 
@@ -67,7 +90,11 @@ const Profile = () => {
                 </Tabs>
               </div>
               <div className="p-4 pt-0 border-t border-flixhive-gray/30">
-                <Button variant="destructive" className="w-full justify-start">
+                <Button 
+                  variant="destructive" 
+                  className="w-full justify-start"
+                  onClick={handleSignOut}
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
                 </Button>
@@ -77,19 +104,114 @@ const Profile = () => {
           
           {/* Main Content */}
           <div>
-            <Card>
-              <CardContent className="p-6">
-                <UserProfile 
-                  appearance={{
-                    elements: {
-                      rootBox: "w-full",
-                      card: "bg-transparent border-0 shadow-none",
-                      pageScrollBox: "p-0"
-                    }
-                  }}
-                />
-              </CardContent>
-            </Card>
+            <Tabs value={activeTab} className="w-full">
+              <TabsContent value="account">
+                <Card>
+                  <CardContent className="p-6">
+                    <UserProfile 
+                      appearance={{
+                        elements: {
+                          rootBox: "w-full",
+                          card: "bg-transparent border-0 shadow-none",
+                          pageScrollBox: "p-0"
+                        }
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="preferences">
+                <Card>
+                  <CardContent className="p-6">
+                    <h2 className="text-2xl font-bold mb-4">Preferences</h2>
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-lg font-medium mb-2">Theme Preferences</h3>
+                        <p className="text-muted-foreground mb-4">Customize your viewing experience</p>
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="flex items-center justify-between">
+                            <span>Dark Mode</span>
+                            <span className="text-flixhive-accent">Enabled</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="pt-4 border-t border-flixhive-gray/30">
+                        <h3 className="text-lg font-medium mb-2">Content Preferences</h3>
+                        <p className="text-muted-foreground mb-4">Customize recommendation settings</p>
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="flex items-center justify-between">
+                            <span>Show Adult Content</span>
+                            <span className="text-destructive">Disabled</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="notifications">
+                <Card>
+                  <CardContent className="p-6">
+                    <h2 className="text-2xl font-bold mb-4">Notifications</h2>
+                    <p className="text-muted-foreground mb-6">Manage your notification preferences</p>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span>Email Notifications</span>
+                        <span className="text-flixhive-accent">Enabled</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>New Reviews</span>
+                        <span className="text-flixhive-accent">Enabled</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>New Recommendations</span>
+                        <span className="text-flixhive-accent">Enabled</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="privacy">
+                <Card>
+                  <CardContent className="p-6">
+                    <h2 className="text-2xl font-bold mb-4">Privacy Settings</h2>
+                    <p className="text-muted-foreground mb-6">Manage your privacy and data settings</p>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span>Public Profile</span>
+                        <span className="text-flixhive-accent">Enabled</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Show Activity History</span>
+                        <span className="text-flixhive-accent">Enabled</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Data Collection</span>
+                        <span className="text-destructive">Disabled</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="activity">
+                <Card>
+                  <CardContent className="p-6">
+                    <h2 className="text-2xl font-bold mb-4">Activity History</h2>
+                    <p className="text-muted-foreground mb-6">Your recent activity on FlixHive</p>
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-md bg-flixhive-gray/10">
+                        <p className="text-sm text-muted-foreground">No recent activity to display.</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </main>
