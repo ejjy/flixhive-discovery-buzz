@@ -53,13 +53,13 @@ const Landing = () => {
         
         <div className="flex flex-col sm:flex-row gap-4 relative z-10">
           <SignUpButton mode="modal">
-            <Button size="lg" className="border-white/30 text-white hover:bg-white/10 bg-transparent border">
+            <Button size="lg" className="bg-transparent border border-white/30 text-amber-400 hover:bg-white/10 hover:text-amber-300">
               Get Started
             </Button>
           </SignUpButton>
           
           <SignInButton mode="modal">
-            <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
+            <Button size="lg" className="bg-transparent border border-white/30 text-amber-400 hover:bg-white/10 hover:text-amber-300">
               Sign In
             </Button>
           </SignInButton>
