@@ -11,14 +11,14 @@ import {
 import { getFirestore } from "firebase/firestore";
 
 // Firebase configuration
-// Using hardcoded config instead of env variables to prevent issues
+// Using environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyDO_6CKlSXCYRD3-gK6zEgPhWBrJrgASVo",
-  authDomain: "flix-hive-demo.firebaseapp.com",
-  projectId: "flix-hive-demo",
-  storageBucket: "flix-hive-demo.appspot.com",
-  messagingSenderId: "132095111673",
-  appId: "1:132095111673:web:eb374ce9379709281faf2e"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // For debugging

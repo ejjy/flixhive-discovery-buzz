@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { BadgePlus, LogIn, LogOut, Loader2 } from 'lucide-react';
+import { BadgePlus, LogIn, LogOut, Loader2, Info } from 'lucide-react';
+import { useEnvVariables } from '@/hooks/useEnvVariables';
 
 export default function TestAuthPanel() {
   const [email, setEmail] = useState('test@flixhive.com');
@@ -14,6 +15,7 @@ export default function TestAuthPanel() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { currentUser, signIn, signUp, logout, isSignedIn } = useAuth();
+  const { getStatus, isFirebaseConfigComplete } = useEnvVariables();
 
   const handleTestUserCreation = async () => {
     setLoading(true);
@@ -167,6 +169,15 @@ export default function TestAuthPanel() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {!isFirebaseConfigComplete() && (
+          <Alert variant="destructive" className="mb-4">
+            <Info className="h-4 w-4" />
+            <AlertTitle>Firebase Configuration Issue</AlertTitle>
+            <AlertDescription>
+              Environment variables for Firebase are missing. This will prevent authentication from working.
+            </AlertDescription>
+          </Alert>
+        )}
         {authError && (
           <Alert variant="destructive" className="mb-4">
             <AlertTitle>Authentication Error</AlertTitle>
@@ -175,10 +186,20 @@ export default function TestAuthPanel() {
         )}
         {renderForm()}
       </CardContent>
-      <CardFooter className="flex justify-between text-sm text-gray-500">
-        <p>
+      <CardFooter className="flex flex-col text-sm text-gray-500">
+        <p className="mb-2">
           Firebase SDK Status: {auth ? "Loaded" : "Not Loaded"}
         </p>
+        <div className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-32 w-full">
+          <p className="font-semibold">Environment Variables Status:</p>
+          <ul>
+            {getStatus().filter(item => item.key.startsWith('FIREBASE')).map((item) => (
+              <li key={item.key} className={item.available ? "text-green-600" : "text-red-600"}>
+                {item.key}: {item.available ? "Available" : "Missing"}
+              </li>
+            ))}
+          </ul>
+        </div>
       </CardFooter>
     </Card>
   );
