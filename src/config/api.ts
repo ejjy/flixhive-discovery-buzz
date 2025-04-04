@@ -5,23 +5,22 @@ export const API_CONFIG = {
   },
   gemini: {
     apiKey: import.meta.env.VITE_GEMINI_API_KEY || ''
+  },
+  openrouter: {
+    apiKey: import.meta.env.VITE_OPENROUTER_API_KEY || ''
   }
 };
 
-// Helper to check if Gemini API key is configured
+// Helper to check if API keys are configured
 export const areApiKeysConfigured = () => {
-  // Check if Gemini API key exists and isn't an empty string or placeholder
-  const geminiKey = API_CONFIG.gemini.apiKey;
+  // Check if OpenRouter API key exists and isn't an empty string
+  const openRouterKey = API_CONFIG.openrouter.apiKey;
   
   // Add detailed console logging for debugging
-  console.log("Gemini API Key validation:", {
-    exists: !!geminiKey,
-    length: geminiKey?.length || 0,
-    validPrefix: geminiKey?.startsWith('AI')
+  console.log("OpenRouter API Key validation:", {
+    exists: !!openRouterKey,
+    length: openRouterKey?.length || 0
   });
   
-  return !!geminiKey && 
-         geminiKey.length > 10 && 
-         geminiKey.startsWith('AI') &&
-         !geminiKey.includes('your_gemini_api_key_here');
+  return !!openRouterKey && openRouterKey.length > 10;
 };

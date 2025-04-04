@@ -23,16 +23,16 @@ export const useAIReview = (movie: Movie) => {
     const configured = areApiKeysConfigured();
     setApiKeyState({
       configured,
-      key: API_CONFIG.gemini.apiKey || ''
+      key: API_CONFIG.openrouter.apiKey || ''
     });
     
     if (!configured) {
-      console.log("Gemini API key not properly configured:", 
-                 API_CONFIG.gemini.apiKey ? 
-                 `Key exists but may be invalid (length: ${API_CONFIG.gemini.apiKey.length}, starts with: ${API_CONFIG.gemini.apiKey.substring(0, 2)})` : 
+      console.log("OpenRouter API key not properly configured:", 
+                 API_CONFIG.openrouter.apiKey ? 
+                 `Key exists but may be invalid (length: ${API_CONFIG.openrouter.apiKey.length})` : 
                  'Key not found');
     } else {
-      console.log("Gemini API key is configured correctly");
+      console.log("OpenRouter API key is configured correctly");
     }
   }, []);
 
@@ -43,14 +43,13 @@ export const useAIReview = (movie: Movie) => {
     setHasError(false);
     
     try {
-      // Check if Gemini API key is configured
-      const geminiApiConfigured = areApiKeysConfigured();
-      console.log("API Keys configuration check result:", geminiApiConfigured);
-      console.log("API Key length:", API_CONFIG.gemini.apiKey?.length || 0);
-      console.log("API Key starts with:", API_CONFIG.gemini.apiKey?.substring(0, 2) || 'N/A');
+      // Check if API key is configured
+      const apiConfigured = areApiKeysConfigured();
+      console.log("API Keys configuration check result:", apiConfigured);
+      console.log("API Key length:", API_CONFIG.openrouter.apiKey?.length || 0);
       
       // If no API key is set, we know we'll get a mock review
-      if (!geminiApiConfigured) {
+      if (!apiConfigured) {
         setIsMockReview(true);
         console.log("Setting to mock review due to missing or invalid API key");
       }
@@ -60,7 +59,7 @@ export const useAIReview = (movie: Movie) => {
         setIsGenerating(true);
         toast({
           title: "Generating AI Review",
-          description: `Creating a fresh review for "${movie.title}" using Gemini AI...`,
+          description: `Creating a fresh review for "${movie.title}" using AI...`,
           duration: 5000,
         });
       }
@@ -72,7 +71,7 @@ export const useAIReview = (movie: Movie) => {
       
       // Check if this is a mock review by examining content
       if (
-        !geminiApiConfigured || 
+        !apiConfigured || 
         (reviewData.summary && (
           reviewData.summary.includes("mock review") || 
           reviewData.summary.includes("API key is not configured") ||
@@ -81,10 +80,10 @@ export const useAIReview = (movie: Movie) => {
         ))
       ) {
         setIsMockReview(true);
-        console.log("Using mock review data - Gemini API key not properly configured");
+        console.log("Using mock review data - OpenRouter API key not properly configured");
         toast({
           title: "API Key Issue",
-          description: `Using mock review data. Your Gemini API key may be invalid or missing. Make sure it starts with 'AI'.`,
+          description: `Using mock review data. Your OpenRouter API key may be invalid or missing.`,
           variant: "destructive",
           duration: 5000,
         });
@@ -99,7 +98,7 @@ export const useAIReview = (movie: Movie) => {
       } else if (movie.id > 1000 || forceRefresh) {
         toast({
           title: "AI Review Ready",
-          description: `We've created a detailed review for "${movie.title}" with Gemini AI`,
+          description: `We've created a detailed review for "${movie.title}" with AI`,
           duration: 3000,
         });
       }

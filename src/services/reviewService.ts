@@ -1,7 +1,7 @@
 
 import { Review, AIReview } from "@/types/movie";
 import { getMovieById } from "./movieListService";
-import { generateAIReview } from "./geminiService";
+import { generateOpenRouterReview } from "./openRouterService";
 import { mockReviews, mockAIReviews } from "./mock/mockData";
 import { getMockReview, getFallbackReview } from "./mock/mockHelpers";
 import { areApiKeysConfigured } from "@/config/api";
@@ -25,23 +25,23 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
       throw new Error('Movie not found');
     }
     
-    // Check if Gemini API key is configured
-    const geminiApiConfigured = areApiKeysConfigured();
-    console.log("Gemini API configured:", geminiApiConfigured);
+    // Check if OpenRouter API key is configured
+    const apiConfigured = areApiKeysConfigured();
+    console.log("OpenRouter API configured:", apiConfigured);
     
     // Try to get from mock data first (if not forcing refresh and mock data exists)
-    if (!forceRefresh && !geminiApiConfigured && mockAIReviews[movieId]) {
-      console.log("Using mock review from data store (no Gemini API key configured)");
+    if (!forceRefresh && !apiConfigured && mockAIReviews[movieId]) {
+      console.log("Using mock review from data store (no API key configured)");
       return mockAIReviews[movieId];
     }
     
-    // If we have Gemini API key or force refresh, try to generate a real review
-    if (geminiApiConfigured || forceRefresh) {
-      console.log("Attempting to generate AI review with Gemini API");
+    // If we have API key or force refresh, try to generate a real review
+    if (apiConfigured || forceRefresh) {
+      console.log("Attempting to generate AI review with OpenRouter API");
       
       try {
-        // Use Gemini API for review generation
-        const review = await generateAIReview(movieData.title, {
+        // Use OpenRouter API for review generation
+        const review = await generateOpenRouterReview(movieData.title, {
           plot: movieData.overview,
           genres: movieData.genres,
           ratings: movieData.platformRatings.map(r => ({
@@ -50,19 +50,19 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
           })),
           releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
           director: movieData.director,
-          actors: movieData.cast // Changed from 'cast' to 'actors' to match the expected type
+          actors: movieData.cast
         });
         
         console.log("AI review generation successful");
         return review;
-      } catch (geminiError) {
-        console.error("Gemini API failed:", geminiError);
-        throw new Error("Gemini API failed to generate review");
+      } catch (apiError) {
+        console.error("OpenRouter API failed:", apiError);
+        throw new Error("OpenRouter API failed to generate review");
       }
     }
     
     // If we get here, no API key is configured and we need a mock review
-    console.log("No Gemini API key configured, using mock review");
+    console.log("No OpenRouter API key configured, using mock review");
     return getMockReview(movieId.toString());
     
   } catch (error) {
