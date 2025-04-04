@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { auth, createTestUser } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,12 +20,7 @@ export default function TestAuthPanel() {
     setLoading(true);
     setAuthError(null);
     try {
-      const testUser = await createTestUser();
-      if (testUser) {
-        console.log("Test user created successfully");
-      } else {
-        console.log("Test user already exists");
-      }
+      await signIn('test@flixhive.com', 'password123');
       setEmail('test@flixhive.com');
       setPassword('password123');
     } catch (error: any) {
@@ -150,10 +144,10 @@ export default function TestAuthPanel() {
             disabled={loading}
           >
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Create Test User
+            Use Test User
           </Button>
           <p className="text-xs text-gray-500 mt-1 text-center">
-            Creates test@flixhive.com with password: password123
+            Uses test@flixhive.com with password: password123
           </p>
         </div>
       </div>
@@ -163,18 +157,18 @@ export default function TestAuthPanel() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Firebase Authentication</CardTitle>
+        <CardTitle>Authentication</CardTitle>
         <CardDescription>
           Sign in or create an account to access all features
         </CardDescription>
       </CardHeader>
       <CardContent>
         {!isFirebaseConfigComplete() && (
-          <Alert variant="destructive" className="mb-4">
+          <Alert variant="warning" className="mb-4">
             <Info className="h-4 w-4" />
-            <AlertTitle>Firebase Configuration Issue</AlertTitle>
+            <AlertTitle>Configuration Notice</AlertTitle>
             <AlertDescription>
-              Environment variables for Firebase are missing. This will prevent authentication from working.
+              Using simplified authentication without Firebase.
             </AlertDescription>
           </Alert>
         )}
@@ -188,17 +182,11 @@ export default function TestAuthPanel() {
       </CardContent>
       <CardFooter className="flex flex-col text-sm text-gray-500">
         <p className="mb-2">
-          Firebase SDK Status: {auth ? "Loaded" : "Not Loaded"}
+          Using localStorage-based authentication
         </p>
         <div className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-32 w-full">
-          <p className="font-semibold">Environment Variables Status:</p>
-          <ul>
-            {getStatus().filter(item => item.key.startsWith('FIREBASE')).map((item) => (
-              <li key={item.key} className={item.available ? "text-green-600" : "text-red-600"}>
-                {item.key}: {item.available ? "Available" : "Missing"}
-              </li>
-            ))}
-          </ul>
+          <p className="font-semibold">Note:</p>
+          <p>Firebase Auth has been removed. Using simplified auth with localStorage.</p>
         </div>
       </CardFooter>
     </Card>
