@@ -77,11 +77,6 @@ const App = () => (
     publishableKey={CLERK_PUBLISHABLE_KEY} 
     clerkJSVersion="5.56.0-snapshot.v20250312225817"
     appearance={clerkAppearance}
-    signInUrl="/sign-in"
-    signUpUrl="/sign-up"
-    signInFallbackRedirectUrl="/dashboard"
-    signUpFallbackRedirectUrl="/dashboard"
-    afterSignOutUrl="/"
     localization={{
       signIn: {
         start: {
@@ -104,25 +99,6 @@ const App = () => (
         }
       }
     }}
-    signUpProps={{
-      initialValues: {
-        emailAddress: '',
-      },
-      signInUrl: '/sign-in',
-    }}
-    signInProps={{
-      initialValues: {
-        identifier: '',
-      },
-      signUpUrl: '/sign-up',
-      redirectUrl: '/dashboard',
-    }}
-    gdprSettings={{
-      allowedExternalReferrers: ["*.lovableproject.com", "*.flixhive.in"],
-      trustedOrigins: ["*.lovableproject.com", "*.flixhive.in"]
-    }}
-    socialAuthSignUpUrl="/sign-up"
-    socialAuthSignInUrl="/sign-in"
   >
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
