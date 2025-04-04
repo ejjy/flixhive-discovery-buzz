@@ -36,9 +36,9 @@ const AIReviewFooter: React.FC<AIReviewFooterProps> = ({
               </p>
               <ol className="text-sm text-white/70 list-decimal ml-5 mt-1 space-y-1">
                 <li>Make sure your VITE_OPENROUTER_API_KEY is set in Netlify environment variables</li>
-                <li>Verify the API key is correct and valid</li>
+                <li>Verify the API key is correct and valid (should be a long string)</li>
                 <li>Redeploy your site after updating the environment variables</li>
-                <li>Check the console logs for more detailed error information</li>
+                <li>Check the browser console logs for more detailed error information</li>
               </ol>
             </div>
           </div>
@@ -58,9 +58,10 @@ const AIReviewFooter: React.FC<AIReviewFooterProps> = ({
                 <li>Temporary API service disruption</li>
                 <li>Rate limiting on the OpenRouter API</li>
                 <li>Network connectivity issues</li>
+                <li>Invalid API key format or permissions</li>
               </ul>
               <p className="text-sm text-white/70 mt-2">
-                Try refreshing the review, or check back later.
+                Try refreshing the review, or check your API key configuration.
               </p>
             </div>
           </div>

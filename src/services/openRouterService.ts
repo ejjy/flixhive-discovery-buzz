@@ -18,11 +18,15 @@ export const generateOpenRouterReview = async (
     // Check if API key is configured
     if (!API_CONFIG.openrouter.apiKey || 
         API_CONFIG.openrouter.apiKey.length < 10) {
-      console.error('OpenRouter API key not properly configured');
+      console.error('OpenRouter API key not properly configured:', 
+                  API_CONFIG.openrouter.apiKey ? 
+                  `Key exists but may be invalid (length: ${API_CONFIG.openrouter.apiKey.length})` : 
+                  'Key not found');
       throw new Error('OpenRouter API credentials not configured correctly');
     }
 
     console.log("Starting OpenRouter API request for movie review:", movieTitle);
+    console.log("OpenRouter API key first 5 chars:", API_CONFIG.openrouter.apiKey.substring(0, 5) + '...');
     
     // Format the movie data for the prompt
     const movieDetails = [
@@ -84,6 +88,7 @@ export const generateOpenRouterReview = async (
 
     console.log("Received response from OpenRouter API");
     const data = await response.json();
+    console.log("OpenRouter API response:", data);
     
     try {
       // Extract the content from OpenRouter response
@@ -117,7 +122,7 @@ export const generateOpenRouterReview = async (
         ottPopularity: []
       };
     } catch (parseError) {
-      console.error('Error parsing OpenRouter response:', parseError);
+      console.error('Error parsing OpenRouter response:', parseError, data);
       console.error('Raw response:', data.choices?.[0]?.message?.content);
       throw new Error('Failed to parse AI review response');
     }
