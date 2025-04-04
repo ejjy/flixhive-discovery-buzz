@@ -9,7 +9,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, createTestUser } from "@/lib/firebase";
+import { useToast } from "@/components/ui/use-toast";
 
 interface AuthContextType {
   currentUser: User | null;
@@ -34,12 +35,17 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
   
   const signUp = async (email: string, password: string) => {
     return createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Auto sign-in after sign-up is handled by onAuthStateChanged
         console.log("User signed up successfully");
+        toast({
+          title: "Account created",
+          description: "You have successfully created an account and logged in.",
+        });
       });
   };
   
@@ -48,6 +54,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .then((userCredential) => {
         // Auto sign-in after sign-in is handled by onAuthStateChanged
         console.log("User signed in successfully");
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully signed in.",
+        });
       });
   };
   
@@ -57,6 +67,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .then((result) => {
         // Auto sign-in after Google sign-in is handled by onAuthStateChanged
         console.log("User signed in with Google successfully");
+        toast({
+          title: "Welcome!",
+          description: "You have successfully signed in with Google.",
+        });
       });
   };
   
@@ -64,10 +78,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return signOut(auth)
       .then(() => {
         console.log("User signed out successfully");
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully.",
+        });
       });
   };
   
   useEffect(() => {
+    // Create a test user when the app starts
+    const setupTestUser = async () => {
+      try {
+        await createTestUser();
+      } catch (error) {
+        console.error("Failed to create test user:", error);
+      }
+    };
+    
+    setupTestUser();
+    
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setIsLoading(false);

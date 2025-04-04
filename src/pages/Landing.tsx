@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { Film, Tv, Star, Clapperboard } from 'lucide-react';
+import { Film, Tv, Star, Clapperboard, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 
 const Landing = () => {
   const { isSignedIn, signIn, signUp, signInWithGoogle } = useAuth();
@@ -43,6 +48,7 @@ const Landing = () => {
         description: error.message || "Could not sign in. Please check your credentials.",
         variant: "destructive",
       });
+      console.error("Sign in error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -63,6 +69,7 @@ const Landing = () => {
         description: error.message || "Could not create account. Please try again.",
         variant: "destructive",
       });
+      console.error("Sign up error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -82,6 +89,7 @@ const Landing = () => {
         description: error.message || "Could not sign in with Google. Please try again.",
         variant: "destructive",
       });
+      console.error("Google sign in error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -123,9 +131,18 @@ const Landing = () => {
               Find out what to watch, with the best reviews and ratings
             </h2>
             
-            <p className="text-white/80 mb-12 max-w-xl relative z-10 text-center md:text-left">
+            <p className="text-white/80 mb-6 max-w-xl relative z-10 text-center md:text-left">
               Discover new movies, get personalized recommendations, and join a community of movie enthusiasts.
             </p>
+            
+            <Alert className="bg-amber-500/20 border-amber-500/50 text-white mb-6">
+              <Info className="h-4 w-4" />
+              <AlertTitle>Test User Credentials</AlertTitle>
+              <AlertDescription>
+                Email: test@flixhive.com<br />
+                Password: password123
+              </AlertDescription>
+            </Alert>
           </div>
           
           <div className="flex items-center justify-center relative z-10">
