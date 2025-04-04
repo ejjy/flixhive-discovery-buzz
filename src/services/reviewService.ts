@@ -48,7 +48,7 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
             source: r.platform,
             value: `${r.score}/${r.outOf}`
           })),
-          releaseYear: new Date(movieData.releaseDate).getFullYear().toString(),
+          releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
           director: movieData.director,
           actors: movieData.cast
         });
