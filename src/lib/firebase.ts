@@ -12,19 +12,20 @@ import { getFirestore } from "firebase/firestore";
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: "AIzaSyDO_6CKlSXCYRD3-gK6zEgPhWBrJrgASVo",
+  authDomain: "flix-hive-demo.firebaseapp.com",
+  projectId: "flix-hive-demo",
+  storageBucket: "flix-hive-demo.appspot.com",
+  messagingSenderId: "132095111673",
+  appId: "1:132095111673:web:eb374ce9379709281faf2e"
 };
 
 // For debugging
-console.log("Firebase config:", { 
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY ? "Key exists" : "Key missing",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID
+console.log("Firebase config details:", { 
+  apiKey: firebaseConfig.apiKey ? "Key provided directly" : "Key missing",
+  apiKeyFromEnv: import.meta.env.VITE_FIREBASE_API_KEY ? "Env key exists" : "Env key missing",
+  authDomain: firebaseConfig.authDomain,
+  projectId: firebaseConfig.projectId
 });
 
 // Initialize Firebase
