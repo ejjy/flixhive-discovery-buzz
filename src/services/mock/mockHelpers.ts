@@ -2,7 +2,7 @@
 import { AIReview } from "@/types/movie";
 
 // Helper function for getting a mock review when API key is not configured
-export function getMockReview(movieTitle: string): AIReview {
+export function getMockReview(movieTitle: string | number): AIReview {
   const movieIdStr = typeof movieTitle === 'number' ? movieTitle.toString() : movieTitle;
   
   return {
@@ -30,9 +30,11 @@ export function getMockReview(movieTitle: string): AIReview {
 }
 
 // Helper function for fallback review when API call fails
-export function getFallbackReview(movieTitle: string): AIReview {
+export function getFallbackReview(movieTitle: string | number): AIReview {
+  const movieIdStr = typeof movieTitle === 'number' ? movieTitle.toString() : movieTitle;
+  
   return {
-    summary: `We couldn't generate a complete AI review for "${movieTitle}" at this time. This may be due to API limitations or connectivity issues.`,
+    summary: `We couldn't generate a complete AI review for "${movieIdStr}" at this time. This may be due to API limitations or connectivity issues.`,
     pros: [
       "The film has received attention from critics and audiences",
       "Movie information is available in our database",

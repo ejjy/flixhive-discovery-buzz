@@ -11,7 +11,7 @@ export const generateAIReview = async (
     ratings?: { source: string; value: string }[];
     releaseYear?: string;
     director?: string;
-    actors?: string[]; // This is the expected property name according to the error
+    actors?: string[]; 
   }
 ): Promise<AIReview> => {
   try {
@@ -131,10 +131,8 @@ export const generateAIReview = async (
   } catch (error) {
     console.error('Error using Gemini API:', error);
     
-    // Generate a random ID for the mock review
-    const mockId = Math.floor(Math.random() * 10000);
-    
-    // Return a mock review
-    return getMockReview(mockId);
+    // Generate a mock review with the movie title (as a string)
+    // This was passing a number before, causing the error
+    return getMockReview(movieTitle.toString());
   }
 };
