@@ -4,24 +4,31 @@ import { searchMoviesOmdb } from "./omdbService";
 import { mockMovies } from "./mock/mockData";
 
 export const searchMovies = async (query: string): Promise<Movie[]> => {
+  console.log(`Searching for: "${query}"...`);
+  
   try {
     // Try to search movies using OMDB API
+    console.log("Attempting OMDB API search...");
     const results = await searchMoviesOmdb(query);
     
     if (results.length > 0) {
+      console.log(`Found ${results.length} movies via OMDB API`);
       return results;
     }
     
     // If OMDB returned no results, search mock data as fallback
+    console.log("No OMDB results, searching mock database...");
     const mockResults = mockMovies.filter(movie => 
       movie.title.toLowerCase().includes(query.toLowerCase()) ||
       movie.overview.toLowerCase().includes(query.toLowerCase())
     );
     
     if (mockResults.length > 0) {
+      console.log(`Found ${mockResults.length} movies in mock database`);
       return mockResults;
     }
     
+    console.log("No matching movies found, generating a placeholder movie");
     // If no matching movies in our mock DB, generate a fake movie with the search term
     const generatedMovie: Movie = {
       id: 1000 + Math.floor(Math.random() * 1000), // Generate a random ID

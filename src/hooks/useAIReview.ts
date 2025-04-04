@@ -61,13 +61,23 @@ export const useAIReview = (movie: Movie) => {
       }
       
       // Check if it's a newly discovered movie (ID > 1000) or forced refresh
-      if (movie.id > 1000 || forceRefresh) {
+      const isNewDiscovery = movie.id > 1000;
+      if (isNewDiscovery || forceRefresh) {
         setIsGenerating(true);
-        toast({
-          title: "Generating AI Review",
-          description: `Creating a fresh review for "${movie.title}" using AI...`,
-          duration: 5000,
-        });
+        
+        if (isNewDiscovery) {
+          toast({
+            title: "Generating AI Review",
+            description: `Creating a new review for "${movie.title}" using AI...`,
+            duration: 5000,
+          });
+        } else if (forceRefresh) {
+          toast({
+            title: "Refreshing AI Review",
+            description: `Creating a fresh review for "${movie.title}" using AI...`,
+            duration: 5000,
+          });
+        }
       }
       
       console.log("Calling getAIReview for movie:", movie.title, "with ID:", movie.id);
@@ -105,7 +115,7 @@ export const useAIReview = (movie: Movie) => {
           variant: "destructive",
           duration: 5000,
         });
-      } else if (movie.id > 1000 || forceRefresh) {
+      } else if (isNewDiscovery || forceRefresh) {
         toast({
           title: "AI Review Ready",
           description: `We've created a detailed review for "${movie.title}" with AI`,

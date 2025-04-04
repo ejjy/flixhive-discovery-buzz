@@ -41,6 +41,12 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
     if (apiConfigured || forceRefresh) {
       console.log("Attempting to generate AI review with available APIs");
       
+      // Check if it's a newly discovered movie (ID > 1000)
+      const isNewlyDiscovered = movieId > 1000;
+      if (isNewlyDiscovered) {
+        console.log("This is a newly discovered movie, generating fresh review");
+      }
+      
       // Determine which API to use based on available keys
       const openRouterKey = API_CONFIG.openrouter.apiKey;
       const hasOpenRouter = !!openRouterKey && openRouterKey.length > 10;
