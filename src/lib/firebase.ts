@@ -29,20 +29,28 @@ console.log("Firebase initialization with config:", {
 });
 
 // Initialize Firebase
+let app;
+let auth;
+let db;
+let googleProvider;
+
 try {
-  const app = initializeApp(firebaseConfig);
+  app = initializeApp(firebaseConfig);
   console.log("Firebase app initialized successfully");
   
   // Initialize Firebase services
-  export const auth = getAuth(app);
-  export const db = getFirestore(app);
-  export const googleProvider = new GoogleAuthProvider();
+  auth = getAuth(app);
+  db = getFirestore(app);
+  googleProvider = new GoogleAuthProvider();
   
   console.log("Firebase auth initialized:", auth ? "Success" : "Failed");
 } catch (error) {
   console.error("Error initializing Firebase:", error);
   throw new Error("Failed to initialize Firebase. Check your configuration.");
 }
+
+// Export Firebase services
+export { auth, db, googleProvider };
 
 // Create a test user for easy testing
 export const createTestUser = async () => {
