@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { Menu, X, Home, Film, TrendingUp, Heart, MessageSquare, User, Info, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SignedIn, SignedOut, UserButton, SignInButton } from '@clerk/clerk-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -21,25 +22,28 @@ const MobileNav: React.FC<MobileNavProps> = ({
   setSearchQuery, 
   handleSearch 
 }) => {
+  const { currentUser, isSignedIn } = useAuth();
+
   return (
     <div className="md:hidden flex items-center gap-3">
-      <SignedIn>
-        <UserButton 
-          afterSignOutUrl="/"
-          appearance={{
-            elements: {
-              userButtonAvatarBox: "w-8 h-8"
-            }
-          }}
-        />
-      </SignedIn>
-      <SignedOut>
-        <SignInButton mode="modal">
+      {isSignedIn ? (
+        <Avatar className="w-8 h-8">
+          <AvatarImage 
+            src={currentUser?.photoURL || ''} 
+            alt="User avatar" 
+          />
+          <AvatarFallback>
+            {currentUser?.displayName ? currentUser.displayName[0] : 
+             currentUser?.email ? currentUser.email[0].toUpperCase() : 'U'}
+          </AvatarFallback>
+        </Avatar>
+      ) : (
+        <Link to="/landing">
           <Button size="sm" className="bg-flixhive-accent hover:bg-flixhive-accent/90">
             Sign In
           </Button>
-        </SignInButton>
-      </SignedOut>
+        </Link>
+      )}
       <Button
         variant="ghost" 
         size="icon"
@@ -76,21 +80,24 @@ const MobileNav: React.FC<MobileNavProps> = ({
             </div>
           </form>
           <div className="space-y-4">
-            <SignedIn>
-              <MobileNavLink to="/dashboard" icon={<Home className="h-5 w-5" />} label="Home" toggleMenu={toggleMenu} />
-              <MobileNavLink to="/movies" icon={<Film className="h-5 w-5" />} label="Movies" toggleMenu={toggleMenu} />
-              <MobileNavLink to="/trending" icon={<TrendingUp className="h-5 w-5" />} label="Trending" toggleMenu={toggleMenu} />
-              <MobileNavLink to="/watchlist" icon={<Heart className="h-5 w-5" />} label="Watchlist" toggleMenu={toggleMenu} />
-              <MobileNavLink to="/reviews" icon={<MessageSquare className="h-5 w-5" />} label="Reviews" toggleMenu={toggleMenu} />
-              <MobileNavLink to="/profile" icon={<User className="h-5 w-5" />} label="Profile" toggleMenu={toggleMenu} />
-              <MobileNavLink to="/about" icon={<Info className="h-5 w-5" />} label="About" toggleMenu={toggleMenu} />
-            </SignedIn>
-            <SignedOut>
-              <MobileNavLink to="/" icon={<Home className="h-5 w-5" />} label="Home" toggleMenu={toggleMenu} />
-              <MobileNavLink to="/trending" icon={<TrendingUp className="h-5 w-5" />} label="Trending" toggleMenu={toggleMenu} />
-              <MobileNavLink to="/search" icon={<Search className="h-5 w-5" />} label="Search" toggleMenu={toggleMenu} />
-              <MobileNavLink to="/about" icon={<Info className="h-5 w-5" />} label="About" toggleMenu={toggleMenu} />
-            </SignedOut>
+            {isSignedIn ? (
+              <>
+                <MobileNavLink to="/dashboard" icon={<Home className="h-5 w-5" />} label="Home" toggleMenu={toggleMenu} />
+                <MobileNavLink to="/movies" icon={<Film className="h-5 w-5" />} label="Movies" toggleMenu={toggleMenu} />
+                <MobileNavLink to="/trending" icon={<TrendingUp className="h-5 w-5" />} label="Trending" toggleMenu={toggleMenu} />
+                <MobileNavLink to="/watchlist" icon={<Heart className="h-5 w-5" />} label="Watchlist" toggleMenu={toggleMenu} />
+                <MobileNavLink to="/reviews" icon={<MessageSquare className="h-5 w-5" />} label="Reviews" toggleMenu={toggleMenu} />
+                <MobileNavLink to="/profile" icon={<User className="h-5 w-5" />} label="Profile" toggleMenu={toggleMenu} />
+                <MobileNavLink to="/about" icon={<Info className="h-5 w-5" />} label="About" toggleMenu={toggleMenu} />
+              </>
+            ) : (
+              <>
+                <MobileNavLink to="/" icon={<Home className="h-5 w-5" />} label="Home" toggleMenu={toggleMenu} />
+                <MobileNavLink to="/trending" icon={<TrendingUp className="h-5 w-5" />} label="Trending" toggleMenu={toggleMenu} />
+                <MobileNavLink to="/search" icon={<Search className="h-5 w-5" />} label="Search" toggleMenu={toggleMenu} />
+                <MobileNavLink to="/about" icon={<Info className="h-5 w-5" />} label="About" toggleMenu={toggleMenu} />
+              </>
+            )}
           </div>
         </div>
       )}

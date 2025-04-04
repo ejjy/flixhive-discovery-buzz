@@ -1,17 +1,91 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
 import { Film, Tv, Star, Clapperboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { SignInButton, SignUpButton, useAuth } from '@clerk/clerk-react';
-import { Navigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 
 const Landing = () => {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, signIn, signUp, signInWithGoogle } = useAuth();
+  const { toast } = useToast();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   if (isSignedIn) {
     return <Navigate to="/home" replace />;
   }
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      await signIn(email, password);
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully signed in.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Sign in failed",
+        description: error.message || "Could not sign in. Please check your credentials.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      await signUp(email, password);
+      toast({
+        title: "Account created!",
+        description: "Your account has been successfully created.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Sign up failed",
+        description: error.message || "Could not create account. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      await signInWithGoogle();
+      toast({
+        title: "Welcome!",
+        description: "You have successfully signed in with Google.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Google sign in failed",
+        description: error.message || "Could not sign in with Google. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-800 to-indigo-900 flex flex-col">
@@ -36,33 +110,193 @@ const Landing = () => {
           </div>
         </div>
         
-        <div className="mb-8 flex items-center relative z-10">
-          <Film className="h-12 w-12 text-amber-400 mr-2" />
-          <h1 className="text-4xl md:text-6xl font-bold text-white">
-            Flix<span className="text-amber-400">Hive</span>
-          </h1>
-        </div>
-        
-        <h2 className="text-xl md:text-2xl text-white/90 mb-6 max-w-2xl relative z-10">
-          Find out what to watch, with the best reviews and ratings
-        </h2>
-        
-        <p className="text-white/80 mb-12 max-w-xl relative z-10">
-          Discover new movies, get personalized recommendations, and join a community of movie enthusiasts.
-        </p>
-        
-        <div className="flex flex-col sm:flex-row gap-4 relative z-10">
-          <SignUpButton mode="modal">
-            <Button size="lg" className="bg-transparent border border-white/30 text-amber-400 hover:bg-white/10 hover:text-amber-300">
-              Get Started
-            </Button>
-          </SignUpButton>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl w-full">
+          <div className="flex flex-col justify-center">
+            <div className="mb-8 flex items-center justify-center md:justify-start relative z-10">
+              <Film className="h-12 w-12 text-amber-400 mr-2" />
+              <h1 className="text-4xl md:text-6xl font-bold text-white">
+                Flix<span className="text-amber-400">Hive</span>
+              </h1>
+            </div>
+            
+            <h2 className="text-xl md:text-2xl text-white/90 mb-6 max-w-2xl relative z-10 text-center md:text-left">
+              Find out what to watch, with the best reviews and ratings
+            </h2>
+            
+            <p className="text-white/80 mb-12 max-w-xl relative z-10 text-center md:text-left">
+              Discover new movies, get personalized recommendations, and join a community of movie enthusiasts.
+            </p>
+          </div>
           
-          <SignInButton mode="modal">
-            <Button size="lg" className="bg-transparent border border-white/30 text-amber-400 hover:bg-white/10 hover:text-amber-300">
-              Sign In
-            </Button>
-          </SignInButton>
+          <div className="flex items-center justify-center relative z-10">
+            <Card className="w-full max-w-md bg-flixhive-dark/80 backdrop-blur-sm border-flixhive-gray/30">
+              <Tabs defaultValue="signin" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="signin">Sign In</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="signin">
+                  <form onSubmit={handleSignIn}>
+                    <CardHeader>
+                      <CardTitle>Sign In</CardTitle>
+                      <CardDescription className="text-white/70">
+                        Enter your credentials to access your account
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-white/80">Email</Label>
+                        <Input 
+                          id="email" 
+                          type="email" 
+                          placeholder="your@email.com"
+                          className="bg-flixhive-gray/50 border-flixhive-gray/30 text-white"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="password" className="text-white/80">Password</Label>
+                        <Input 
+                          id="password" 
+                          type="password" 
+                          className="bg-flixhive-gray/50 border-flixhive-gray/30 text-white"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex flex-col gap-4">
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-flixhive-accent hover:bg-flixhive-accent/90 text-white"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? "Signing in..." : "Sign In"}
+                      </Button>
+                      <div className="relative w-full">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t border-white/20" />
+                        </div>
+                        <div className="relative flex justify-center text-xs">
+                          <span className="bg-flixhive-dark px-2 text-white/60">or continue with</span>
+                        </div>
+                      </div>
+                      <Button 
+                        type="button"
+                        className="w-full bg-white text-gray-800 hover:bg-white/90"
+                        onClick={handleGoogleSignIn}
+                        disabled={isLoading}
+                      >
+                        <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                          <path
+                            fill="currentColor"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                          />
+                          <path
+                            fill="currentColor"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          />
+                          <path
+                            fill="currentColor"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                          />
+                          <path
+                            fill="currentColor"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                          />
+                        </svg>
+                        Google
+                      </Button>
+                    </CardFooter>
+                  </form>
+                </TabsContent>
+                
+                <TabsContent value="signup">
+                  <form onSubmit={handleSignUp}>
+                    <CardHeader>
+                      <CardTitle>Sign Up</CardTitle>
+                      <CardDescription className="text-white/70">
+                        Create an account to get started
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="new-email" className="text-white/80">Email</Label>
+                        <Input 
+                          id="new-email" 
+                          type="email" 
+                          placeholder="your@email.com"
+                          className="bg-flixhive-gray/50 border-flixhive-gray/30 text-white"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="new-password" className="text-white/80">Password</Label>
+                        <Input 
+                          id="new-password" 
+                          type="password" 
+                          className="bg-flixhive-gray/50 border-flixhive-gray/30 text-white"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                        />
+                        <p className="text-xs text-white/60">Password must be at least 6 characters</p>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex flex-col gap-4">
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-flixhive-accent hover:bg-flixhive-accent/90 text-white"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? "Creating account..." : "Create Account"}
+                      </Button>
+                      <div className="relative w-full">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t border-white/20" />
+                        </div>
+                        <div className="relative flex justify-center text-xs">
+                          <span className="bg-flixhive-dark px-2 text-white/60">or continue with</span>
+                        </div>
+                      </div>
+                      <Button 
+                        type="button"
+                        className="w-full bg-white text-gray-800 hover:bg-white/90"
+                        onClick={handleGoogleSignIn}
+                        disabled={isLoading}
+                      >
+                        <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                          <path
+                            fill="currentColor"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                          />
+                          <path
+                            fill="currentColor"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          />
+                          <path
+                            fill="currentColor"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                          />
+                          <path
+                            fill="currentColor"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                          />
+                        </svg>
+                        Google
+                      </Button>
+                    </CardFooter>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            </Card>
+          </div>
         </div>
       </div>
       

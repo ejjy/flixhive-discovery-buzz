@@ -2,7 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { UserButton, SignedIn, SignedOut, SignInButton, useClerk } from '@clerk/clerk-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -14,26 +15,28 @@ import {
 import { User, LogOut, Settings } from 'lucide-react';
 
 const UserMenu = () => {
-  const { signOut } = useClerk();
+  const { currentUser, logout, isSignedIn } = useAuth();
 
   const handleSignOut = () => {
-    signOut();
+    logout();
   };
 
   return (
     <>
-      <SignedIn>
+      {isSignedIn ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <div className="cursor-pointer">
-              <UserButton 
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    userButtonAvatarBox: "w-9 h-9"
-                  }
-                }}
-              />
+              <Avatar className="w-9 h-9">
+                <AvatarImage 
+                  src={currentUser?.photoURL || ''} 
+                  alt="User avatar" 
+                />
+                <AvatarFallback>
+                  {currentUser?.displayName ? currentUser.displayName[0] : 
+                   currentUser?.email ? currentUser.email[0].toUpperCase() : 'U'}
+                </AvatarFallback>
+              </Avatar>
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 bg-flixhive-dark border-flixhive-gray/30">
@@ -61,14 +64,13 @@ const UserMenu = () => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </SignedIn>
-      <SignedOut>
-        <SignInButton mode="modal">
+      ) : (
+        <Link to="/landing">
           <Button className="bg-transparent border border-white/30 text-amber-400 hover:bg-white/10 hover:text-amber-300">
             Sign In
           </Button>
-        </SignInButton>
-      </SignedOut>
+        </Link>
+      )}
     </>
   );
 };
