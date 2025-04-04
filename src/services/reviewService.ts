@@ -50,7 +50,7 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
           })),
           releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
           director: movieData.director,
-          cast: movieData.cast
+          actors: movieData.cast // Changed from 'cast' to 'actors' to match the expected type
         });
         
         console.log("AI review generation successful");

@@ -11,7 +11,7 @@ export const generateAIReview = async (
     ratings?: { source: string; value: string }[];
     releaseYear?: string;
     director?: string;
-    actors?: string[];
+    actors?: string[]; // This is the expected property name according to the error
   }
 ): Promise<AIReview> => {
   try {
