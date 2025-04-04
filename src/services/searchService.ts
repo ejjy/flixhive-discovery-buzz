@@ -2,6 +2,7 @@
 import { Movie } from "@/types/movie";
 import { searchMoviesOmdb } from "./omdbService";
 import { mockMovies } from "./mock/mockData";
+import { getPopulatedMovies } from "./moviePopulationService";
 
 export const searchMovies = async (query: string): Promise<Movie[]> => {
   console.log(`Searching for: "${query}"...`);
@@ -16,20 +17,22 @@ export const searchMovies = async (query: string): Promise<Movie[]> => {
       return results;
     }
     
-    // If OMDB returned no results, search mock data as fallback
-    console.log("No OMDB results, searching mock database...");
-    const mockResults = mockMovies.filter(movie => 
+    // If OMDB returned no results, search our populated and mock data
+    console.log("No OMDB results, searching populated and mock database...");
+    const allMovies = getPopulatedMovies(); // This includes both populated and mock movies
+    
+    const localResults = allMovies.filter(movie => 
       movie.title.toLowerCase().includes(query.toLowerCase()) ||
       movie.overview.toLowerCase().includes(query.toLowerCase())
     );
     
-    if (mockResults.length > 0) {
-      console.log(`Found ${mockResults.length} movies in mock database`);
-      return mockResults;
+    if (localResults.length > 0) {
+      console.log(`Found ${localResults.length} movies in local database`);
+      return localResults;
     }
     
     console.log("No matching movies found, generating a placeholder movie");
-    // If no matching movies in our mock DB, generate a fake movie with the search term
+    // If no matching movies in our local data, generate a fake movie with the search term
     const generatedMovie: Movie = {
       id: 1000 + Math.floor(Math.random() * 1000), // Generate a random ID
       title: query.split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" "),

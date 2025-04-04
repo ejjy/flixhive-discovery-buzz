@@ -5,6 +5,7 @@ import { getAIReview } from '@/services/movieService';
 import { useToast } from '@/components/ui/use-toast';
 import { areApiKeysConfigured } from '@/config/api';
 import { API_CONFIG } from '@/config/api';
+import { isMoviePopulated } from '@/services/moviePopulationService'; 
 
 export const useAIReview = (movie: Movie) => {
   const { toast } = useToast();
@@ -44,7 +45,13 @@ export const useAIReview = (movie: Movie) => {
     }
     
     setIsLoading(true);
-    setIsGenerating(movie.id > 1000 || forceRefresh);
+    
+    // Determine if we need to generate a new review or if we're dealing with a populated movie
+    const isPopulatedMovie = isMoviePopulated(movie.id);
+    const isNewDiscovery = movie.id > 1000;
+    const shouldGenerate = isNewDiscovery || forceRefresh || isPopulatedMovie;
+    
+    setIsGenerating(shouldGenerate);
     setIsMockReview(false);
     setHasError(false);
     
@@ -60,24 +67,25 @@ export const useAIReview = (movie: Movie) => {
         console.log("Setting to mock review due to missing or invalid OpenRouter API key");
       }
       
-      // Check if it's a newly discovered movie (ID > 1000) or forced refresh
-      const isNewDiscovery = movie.id > 1000;
-      if (isNewDiscovery || forceRefresh) {
-        setIsGenerating(true);
-        
-        if (isNewDiscovery) {
-          toast({
-            title: "Generating AI Review",
-            description: `Creating a new review for "${movie.title}" using AI...`,
-            duration: 5000,
-          });
-        } else if (forceRefresh) {
-          toast({
-            title: "Refreshing AI Review",
-            description: `Creating a fresh review for "${movie.title}" using AI...`,
-            duration: 5000,
-          });
-        }
+      // Show appropriate toasts based on the context
+      if (isNewDiscovery) {
+        toast({
+          title: "Generating AI Review",
+          description: `Creating a new review for "${movie.title}" using AI...`,
+          duration: 5000,
+        });
+      } else if (forceRefresh) {
+        toast({
+          title: "Refreshing AI Review",
+          description: `Creating a fresh review for "${movie.title}" using AI...`,
+          duration: 5000,
+        });
+      } else if (isPopulatedMovie) {
+        toast({
+          title: "Loading Movie Review",
+          description: `Loading AI review for "${movie.title}"...`,
+          duration: 3000,
+        });
       }
       
       console.log("Calling getAIReview for movie:", movie.title, "with ID:", movie.id);
