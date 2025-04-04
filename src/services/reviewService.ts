@@ -50,7 +50,7 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
           })),
           releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
           director: movieData.director,
-          actors: movieData.cast
+          cast: movieData.cast
         });
         
         console.log("AI review generation successful");
@@ -63,10 +63,16 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
     
     // If we get here, no API key is configured and we need a mock review
     console.log("No Gemini API key configured, using mock review");
-    return getMockReview(movieId);
+    return getMockReview(movieId.toString());
     
   } catch (error) {
     console.error('Error generating AI review:', error);
-    return getFallbackReview(movieId);
+    
+    // Make sure we have a movie title to pass to getFallbackReview
+    const movieTitle = typeof movieId === 'number' ? 
+      (await getMovieById(movieId))?.title || `Movie ${movieId}` : 
+      movieId;
+      
+    return getFallbackReview(movieTitle);
   }
 };
