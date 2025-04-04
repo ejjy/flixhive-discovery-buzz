@@ -110,7 +110,7 @@ const Landing = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl w-full">
           <div className="flex flex-col justify-center">
             <div className="mb-8 flex items-center justify-center md:justify-start relative z-10">
               <Film className="h-12 w-12 text-amber-400 mr-2" />
@@ -129,7 +129,7 @@ const Landing = () => {
           </div>
           
           <div className="flex items-center justify-center relative z-10">
-            <Card className="w-full max-w-md bg-flixhive-dark/80 backdrop-blur-sm border-flixhive-gray/30">
+            <Card className="w-full max-w-sm bg-flixhive-dark/80 backdrop-blur-sm border-flixhive-gray/30">
               <Tabs defaultValue="signin" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="signin">Sign In</TabsTrigger>
@@ -137,42 +137,42 @@ const Landing = () => {
                 </TabsList>
                 
                 <TabsContent value="signin">
-                  <form onSubmit={handleSignIn}>
-                    <CardHeader>
-                      <CardTitle>Sign In</CardTitle>
-                      <CardDescription className="text-white/70">
-                        Enter your credentials to access your account
+                  <form onSubmit={handleSignIn} className="space-y-3 py-2">
+                    <CardHeader className="p-4 pb-0">
+                      <CardTitle className="text-lg">Sign In</CardTitle>
+                      <CardDescription className="text-white/70 text-sm">
+                        Enter your credentials
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="email" className="text-white/80">Email</Label>
+                    <CardContent className="space-y-3 p-4 pt-0">
+                      <div className="space-y-1">
+                        <Label htmlFor="email" className="text-white/80 text-sm">Email</Label>
                         <Input 
                           id="email" 
                           type="email" 
                           placeholder="your@email.com"
-                          className="bg-flixhive-gray/50 border-flixhive-gray/30 text-white"
+                          className="bg-flixhive-gray/50 border-flixhive-gray/30 text-white h-9"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           required
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="password" className="text-white/80">Password</Label>
+                      <div className="space-y-1">
+                        <Label htmlFor="password" className="text-white/80 text-sm">Password</Label>
                         <Input 
                           id="password" 
                           type="password" 
-                          className="bg-flixhive-gray/50 border-flixhive-gray/30 text-white"
+                          className="bg-flixhive-gray/50 border-flixhive-gray/30 text-white h-9"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
                         />
                       </div>
                     </CardContent>
-                    <CardFooter className="flex flex-col gap-4">
+                    <CardFooter className="flex flex-col gap-3 p-4 pt-0">
                       <Button 
                         type="submit" 
-                        className="w-full bg-flixhive-accent hover:bg-flixhive-accent/90 text-white"
+                        className="w-full bg-flixhive-accent hover:bg-flixhive-accent/90 text-white h-9"
                         disabled={isLoading}
                       >
                         {isLoading ? "Signing in..." : "Sign In"}
@@ -182,16 +182,16 @@ const Landing = () => {
                           <span className="w-full border-t border-white/20" />
                         </div>
                         <div className="relative flex justify-center text-xs">
-                          <span className="bg-flixhive-dark px-2 text-white/60">or continue with</span>
+                          <span className="bg-flixhive-dark px-2 text-white/60">or</span>
                         </div>
                       </div>
                       <Button 
                         type="button"
-                        className="w-full bg-white text-gray-800 hover:bg-white/90"
+                        className="w-full bg-white text-gray-800 hover:bg-white/90 h-9"
                         onClick={handleGoogleSignIn}
                         disabled={isLoading}
                       >
-                        <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                           <path
                             fill="currentColor"
                             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -216,32 +216,32 @@ const Landing = () => {
                 </TabsContent>
                 
                 <TabsContent value="signup">
-                  <form onSubmit={handleSignUp}>
-                    <CardHeader>
-                      <CardTitle>Sign Up</CardTitle>
-                      <CardDescription className="text-white/70">
-                        Create an account to get started
+                  <form onSubmit={handleSignUp} className="space-y-3 py-2">
+                    <CardHeader className="p-4 pb-0">
+                      <CardTitle className="text-lg">Sign Up</CardTitle>
+                      <CardDescription className="text-white/70 text-sm">
+                        Create an account
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="new-email" className="text-white/80">Email</Label>
+                    <CardContent className="space-y-3 p-4 pt-0">
+                      <div className="space-y-1">
+                        <Label htmlFor="new-email" className="text-white/80 text-sm">Email</Label>
                         <Input 
                           id="new-email" 
                           type="email" 
                           placeholder="your@email.com"
-                          className="bg-flixhive-gray/50 border-flixhive-gray/30 text-white"
+                          className="bg-flixhive-gray/50 border-flixhive-gray/30 text-white h-9"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           required
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="new-password" className="text-white/80">Password</Label>
+                      <div className="space-y-1">
+                        <Label htmlFor="new-password" className="text-white/80 text-sm">Password</Label>
                         <Input 
                           id="new-password" 
                           type="password" 
-                          className="bg-flixhive-gray/50 border-flixhive-gray/30 text-white"
+                          className="bg-flixhive-gray/50 border-flixhive-gray/30 text-white h-9"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
@@ -249,29 +249,29 @@ const Landing = () => {
                         <p className="text-xs text-white/60">Password must be at least 6 characters</p>
                       </div>
                     </CardContent>
-                    <CardFooter className="flex flex-col gap-4">
+                    <CardFooter className="flex flex-col gap-3 p-4 pt-0">
                       <Button 
                         type="submit" 
-                        className="w-full bg-flixhive-accent hover:bg-flixhive-accent/90 text-white"
+                        className="w-full bg-flixhive-accent hover:bg-flixhive-accent/90 text-white h-9"
                         disabled={isLoading}
                       >
-                        {isLoading ? "Creating account..." : "Create Account"}
+                        {isLoading ? "Creating..." : "Create Account"}
                       </Button>
                       <div className="relative w-full">
                         <div className="absolute inset-0 flex items-center">
                           <span className="w-full border-t border-white/20" />
                         </div>
                         <div className="relative flex justify-center text-xs">
-                          <span className="bg-flixhive-dark px-2 text-white/60">or continue with</span>
+                          <span className="bg-flixhive-dark px-2 text-white/60">or</span>
                         </div>
                       </div>
                       <Button 
                         type="button"
-                        className="w-full bg-white text-gray-800 hover:bg-white/90"
+                        className="w-full bg-white text-gray-800 hover:bg-white/90 h-9"
                         onClick={handleGoogleSignIn}
                         disabled={isLoading}
                       >
-                        <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                           <path
                             fill="currentColor"
                             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
