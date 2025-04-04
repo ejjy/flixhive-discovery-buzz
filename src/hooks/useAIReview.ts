@@ -21,24 +21,28 @@ export const useAIReview = (movie: Movie) => {
   // Check API configuration on mount
   useEffect(() => {
     const openRouterKey = API_CONFIG.openrouter.apiKey || '';
-    const configured = !!openRouterKey && openRouterKey.length > 10;
+    const configured = areApiKeysConfigured();
+    
+    console.log("OpenRouter API Key validation:", {
+      keyExists: !!openRouterKey,
+      keyLength: openRouterKey?.length,
+      configured
+    });
     
     setApiKeyState({
       configured,
       openRouter: openRouterKey || ''
     });
-    
-    if (!configured) {
-      console.log("OpenRouter API key not properly configured:", 
-                 openRouterKey ? 
-                 `Key exists but may be invalid (length: ${openRouterKey.length})` : 
-                 'Key not found');
-    } else {
-      console.log("OpenRouter API key is configured correctly");
-    }
   }, []);
 
   const fetchAIReview = async (forceRefresh = false) => {
+    if (!movie || !movie.id) {
+      console.error("Cannot fetch AI review for invalid movie", movie);
+      setIsLoading(false);
+      setHasError(true);
+      return;
+    }
+    
     setIsLoading(true);
     setIsGenerating(movie.id > 1000 || forceRefresh);
     setIsMockReview(false);
@@ -46,9 +50,9 @@ export const useAIReview = (movie: Movie) => {
     
     try {
       // Check if API key is configured
-      const openRouterKey = API_CONFIG.openrouter.apiKey || '';
-      const apiConfigured = !!openRouterKey && openRouterKey.length > 10;
-      console.log("OpenRouter API key configuration check result:", apiConfigured);
+      const apiConfigured = areApiKeysConfigured();
+      console.log("API keys configured:", apiConfigured);
+      console.log("API Key length:", API_CONFIG.openrouter.apiKey?.length);
       
       // If no API key is set, we know we'll get a mock review
       if (!apiConfigured) {
@@ -81,13 +85,15 @@ export const useAIReview = (movie: Movie) => {
         ))
       ) {
         setIsMockReview(true);
-        console.log("Using mock review data - OpenRouter API key not properly configured");
-        toast({
-          title: "API Key Issue",
-          description: `Using mock review data. Add OpenRouter API key in Netlify environment variables.`,
-          variant: "destructive",
-          duration: 5000,
-        });
+        console.log("Using mock review data");
+        if (!apiConfigured) {
+          toast({
+            title: "API Key Issue",
+            description: `Using mock review data. Add OpenRouter API key in Netlify environment variables.`,
+            variant: "destructive",
+            duration: 5000,
+          });
+        }
       } else if (reviewData.summary && (
         reviewData.summary.includes("couldn't generate") ||
         reviewData.summary.includes("couldn't complete")
@@ -122,7 +128,7 @@ export const useAIReview = (movie: Movie) => {
   };
 
   useEffect(() => {
-    if (movie) {
+    if (movie && movie.id) {
       fetchAIReview();
     }
   }, [movie]);

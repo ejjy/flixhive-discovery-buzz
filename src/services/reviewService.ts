@@ -2,7 +2,6 @@
 import { Review, AIReview } from "@/types/movie";
 import { getMovieById } from "./movieListService";
 import { generateOpenRouterReview } from "./openRouterService";
-import { generatePerplexityReview } from "../utils/perplexityService";
 import { mockReviews, mockAIReviews } from "./mock/mockData";
 import { getMockReview, getFallbackReview } from "./mock/mockHelpers";
 import { areApiKeysConfigured } from "@/config/api";
@@ -23,8 +22,9 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
     const movieData = await getMovieById(movieId);
     
     if (!movieData) {
-      console.error('Movie not found');
-      throw new Error('Movie not found');
+      console.error(`Movie not found with ID: ${movieId}`);
+      // Instead of throwing an error, return a fallback review
+      return getFallbackReview(`Movie ID: ${movieId}`);
     }
     
     // Check if API keys are configured
@@ -43,7 +43,6 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
       
       // Determine which API to use based on available keys
       const openRouterKey = API_CONFIG.openrouter.apiKey;
-      const perplexityKey = API_CONFIG.perplexity.apiKey;
       const hasOpenRouter = !!openRouterKey && openRouterKey.length > 10;
       
       try {
@@ -54,20 +53,19 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
             const review = await generateOpenRouterReview(movieData.title, {
               plot: movieData.overview,
               genres: movieData.genres,
-              ratings: movieData.platformRatings.map(r => ({
+              ratings: movieData.platformRatings?.map(r => ({
                 source: r.platform,
                 value: `${r.score}/${r.outOf}`
-              })),
+              })) || [],
               releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
-              director: movieData.director,
-              actors: movieData.cast
+              director: movieData.director || "Unknown Director",
+              actors: movieData.cast || []
             });
             
             console.log("OpenRouter API review generation successful");
             return review;
           } catch (openRouterError) {
             console.error("OpenRouter API failed:", openRouterError);
-            // Fall through to use mock/fallback review instead of trying Perplexity
             throw openRouterError;
           }
         } else {
@@ -77,7 +75,8 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
         
       } catch (apiError) {
         console.error("API attempt failed:", apiError);
-        throw new Error("Failed to generate review with OpenRouter API");
+        // Generate a fallback review for the movie
+        return getFallbackReview(movieData.title);
       }
     }
     
@@ -88,7 +87,7 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
   } catch (error) {
     console.error('Error generating AI review:', error);
     
-    // Make sure we have a movie title to pass to getFallbackReview
+    // Try to get the movie title if possible
     let movieTitle = `Movie ${movieId}`;
     try {
       const movie = await getMovieById(movieId);

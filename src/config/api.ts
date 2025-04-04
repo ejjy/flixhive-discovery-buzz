@@ -20,12 +20,11 @@ export const areApiKeysConfigured = () => {
   const openRouterKey = API_CONFIG.openrouter.apiKey;
   
   // Add detailed console logging for debugging
-  console.log("API Key validation:", {
-    openRouter: {
-      exists: !!openRouterKey,
-      length: openRouterKey?.length || 0,
-      firstFiveChars: openRouterKey ? openRouterKey.substring(0, 5) + '...' : 'none'
-    }
+  console.log("OpenRouter API Key validation:", {
+    exists: !!openRouterKey,
+    length: openRouterKey?.length || 0,
+    firstFiveChars: openRouterKey ? openRouterKey.substring(0, 5) + '...' : 'none',
+    isValid: !!openRouterKey && openRouterKey.length > 10
   });
 
   // Check if OpenRouter API key is properly configured

@@ -35,9 +35,15 @@ export const generateOpenRouterReview = async (
       movieData.genres?.length ? `Genres: ${movieData.genres.join(', ')}` : '',
       movieData.releaseYear ? `Year: ${movieData.releaseYear}` : '',
       movieData.director ? `Director: ${movieData.director}` : '',
-      movieData.actors?.length ? `Actors: ${movieData.actors.join(', ')}` : '',
-      movieData.ratings?.length ? `Ratings: ${movieData.ratings.map(r => `${r.source}: ${r.value}`).join(', ')}` : ''
+      movieData.actors?.length ? `Actors: ${movieData.actors.join(', ')}` : ''
     ].filter(Boolean).join('\n');
+
+    // Add ratings information if available
+    let ratingsText = '';
+    if (movieData.ratings && movieData.ratings.length > 0) {
+      ratingsText = 'Ratings: ' + movieData.ratings.map(r => `${r.source}: ${r.value}`).join(', ');
+      movieDetails.concat('\n' + ratingsText);
+    }
 
     const prompt = `Generate a thoughtful movie review for "${movieTitle}" with the following information:
     
@@ -55,84 +61,85 @@ export const generateOpenRouterReview = async (
 
     console.log("Sending request to OpenRouter API");
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${API_CONFIG.openrouter.apiKey}`,
-        "HTTP-Referer": window.location.origin, // Recommended for including your site URL
-        "X-Title": "FlixHive" // Optional - Name of your app
-      },
-      body: JSON.stringify({
-        model: "anthropic/claude-3-haiku", // Using Claude which is good at structured outputs
-        messages: [
-          {
-            role: "system",
-            content: "You are a film critic AI that provides detailed and balanced movie reviews. Always format your response as valid JSON."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.2, // Low temperature for more predictable, structured output
-        max_tokens: 1000
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`OpenRouter API failed with status: ${response.status}`, errorText);
-      throw new Error(`OpenRouter API failed with status: ${response.status}`);
-    }
-
-    console.log("Received response from OpenRouter API");
-    const data = await response.json();
-    console.log("OpenRouter API response:", data);
-    
     try {
-      // Extract the content from OpenRouter response
-      const content = data.choices?.[0]?.message?.content;
-      
-      if (!content) {
-        console.error('Invalid response format from OpenRouter API', data);
-        throw new Error('Invalid response format from OpenRouter API');
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${API_CONFIG.openrouter.apiKey}`,
+          "HTTP-Referer": window.location.origin, // Recommended for including your site URL
+          "X-Title": "FlixHive" // Optional - Name of your app
+        },
+        body: JSON.stringify({
+          model: "anthropic/claude-3-haiku", // Using Claude which is good at structured outputs
+          messages: [
+            {
+              role: "system",
+              content: "You are a film critic AI that provides detailed and balanced movie reviews. Always format your response as valid JSON."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          temperature: 0.2, // Low temperature for more predictable, structured output
+          max_tokens: 1000
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`OpenRouter API failed with status: ${response.status}`, errorText);
+        throw new Error(`OpenRouter API failed with status: ${response.status}`);
       }
+
+      console.log("Received response from OpenRouter API");
+      const data = await response.json();
       
-      console.log("Raw OpenRouter response:", content.substring(0, 100) + "...");
-      
-      // Extract JSON content if it's wrapped in code blocks
-      let jsonContent = content;
-      const jsonMatch = content.match(/```(?:json)?\n([\s\S]*?)\n```/) || 
-                        content.match(/```([\s\S]*?)```/);
-      
-      if (jsonMatch && jsonMatch[1]) {
-        jsonContent = jsonMatch[1];
+      try {
+        // Extract the content from OpenRouter response
+        const content = data.choices?.[0]?.message?.content;
+        
+        if (!content) {
+          console.error('Invalid response format from OpenRouter API', data);
+          throw new Error('Invalid response format from OpenRouter API');
+        }
+        
+        console.log("Raw OpenRouter response:", content.substring(0, 100) + "...");
+        
+        // Extract JSON content if it's wrapped in code blocks
+        let jsonContent = content;
+        const jsonMatch = content.match(/```(?:json)?\n([\s\S]*?)\n```/) || 
+                          content.match(/```([\s\S]*?)```/);
+        
+        if (jsonMatch && jsonMatch[1]) {
+          jsonContent = jsonMatch[1];
+        }
+        
+        console.log("Attempting to parse JSON response");
+        const parsedReview = JSON.parse(jsonContent.trim());
+        
+        console.log("Successfully parsed OpenRouter response into JSON");
+        return {
+          summary: parsedReview.summary || "Couldn't generate a proper summary.",
+          pros: parsedReview.pros || ["Interesting performances", "Unique visual style", "Engaging story"],
+          cons: parsedReview.cons || ["Pacing issues", "Underdeveloped characters", "Predictable plot points"],
+          watchRecommendation: parsedReview.watchRecommendation || "Worth watching despite its flaws.",
+          ottPopularity: []
+        };
+      } catch (parseError) {
+        console.error('Error parsing OpenRouter response:', parseError);
+        console.error('Raw response content:', data.choices?.[0]?.message?.content);
+        throw new Error('Failed to parse AI review response');
       }
-      
-      console.log("Attempting to parse JSON response");
-      const parsedReview = JSON.parse(jsonContent.trim());
-      
-      console.log("Successfully parsed OpenRouter response into JSON");
-      return {
-        summary: parsedReview.summary || "Couldn't generate a proper summary.",
-        pros: parsedReview.pros || ["Interesting performances", "Unique visual style", "Engaging story"],
-        cons: parsedReview.cons || ["Pacing issues", "Underdeveloped characters", "Predictable plot points"],
-        watchRecommendation: parsedReview.watchRecommendation || "Worth watching despite its flaws.",
-        ottPopularity: []
-      };
-    } catch (parseError) {
-      console.error('Error parsing OpenRouter response:', parseError, data);
-      console.error('Raw response:', data.choices?.[0]?.message?.content);
-      throw new Error('Failed to parse AI review response');
+    } catch (fetchError) {
+      console.error('Error making request to OpenRouter API:', fetchError);
+      throw fetchError;
     }
   } catch (error) {
     console.error('Error using OpenRouter API:', error);
     
-    // Generate a random ID for the mock review
-    const mockId = Math.floor(Math.random() * 10000).toString();
-    
-    // Return a mock review
-    return getMockReview(mockId);
+    // Generate a review based on the movie title
+    return getFallbackReview(movieTitle);
   }
 };
