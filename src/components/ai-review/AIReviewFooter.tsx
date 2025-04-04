@@ -35,7 +35,7 @@ const AIReviewFooter: React.FC<AIReviewFooterProps> = ({
                 This is a mock review. To get real AI-powered reviews:
               </p>
               <ol className="text-sm text-white/70 list-decimal ml-5 mt-1 space-y-1">
-                <li>Make sure you set either VITE_OPENROUTER_API_KEY or VITE_PERPLEXITY_API_KEY in Netlify environment variables</li>
+                <li>Make sure you set VITE_OPENROUTER_API_KEY in Netlify environment variables</li>
                 <li>Verify the API key is correct and valid (should be a long string)</li>
                 <li>Redeploy your site after updating the environment variables</li>
                 <li>Check the browser console logs for more detailed error information</li>
@@ -55,7 +55,7 @@ const AIReviewFooter: React.FC<AIReviewFooterProps> = ({
                 We encountered an error while generating the AI review. This could be due to:
               </p>
               <ul className="text-sm text-white/70 list-disc ml-5 mt-1 space-y-1">
-                <li>Temporary API service disruption</li>
+                <li>Temporary OpenRouter API service disruption</li>
                 <li>Rate limiting on the AI service</li>
                 <li>Network connectivity issues</li>
                 <li>Invalid API key format or permissions</li>
@@ -71,7 +71,7 @@ const AIReviewFooter: React.FC<AIReviewFooterProps> = ({
       <div className="mt-4 text-xs text-white/40 flex items-center gap-1">
         <BookOpen className="h-3 w-3" />
         {isMockReview ? (
-          <span>Mock review only. Configure OpenRouter or Perplexity API key in Netlify for real AI reviews.</span>
+          <span>Mock review only. Configure OpenRouter API key in Netlify for real AI reviews.</span>
         ) : hasError ? (
           <span>Generated with limited information. Try refreshing for a better review.</span>
         ) : isNewDiscovery ? (

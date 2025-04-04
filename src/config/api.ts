@@ -16,9 +16,8 @@ export const API_CONFIG = {
 
 // Helper to check if API keys are configured
 export const areApiKeysConfigured = () => {
-  // Check if OpenRouter API key exists and isn't an empty string
+  // Only check OpenRouter API key
   const openRouterKey = API_CONFIG.openrouter.apiKey;
-  const perplexityKey = API_CONFIG.perplexity.apiKey;
   
   // Add detailed console logging for debugging
   console.log("API Key validation:", {
@@ -26,15 +25,9 @@ export const areApiKeysConfigured = () => {
       exists: !!openRouterKey,
       length: openRouterKey?.length || 0,
       firstFiveChars: openRouterKey ? openRouterKey.substring(0, 5) + '...' : 'none'
-    },
-    perplexity: {
-      exists: !!perplexityKey,
-      length: perplexityKey?.length || 0,
-      firstFiveChars: perplexityKey ? perplexityKey.substring(0, 5) + '...' : 'none'
     }
   });
 
-  // Check if either API key is properly configured
-  return (!!openRouterKey && openRouterKey.length > 10) ||
-         (!!perplexityKey && perplexityKey.length > 10);
+  // Check if OpenRouter API key is properly configured
+  return !!openRouterKey && openRouterKey.length > 10;
 };
