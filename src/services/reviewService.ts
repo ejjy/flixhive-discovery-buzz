@@ -2,9 +2,11 @@
 import { Review, AIReview } from "@/types/movie";
 import { getMovieById } from "./movieListService";
 import { generateOpenRouterReview } from "./openRouterService";
+import { generatePerplexityReview } from "../utils/perplexityService";
 import { mockReviews, mockAIReviews } from "./mock/mockData";
 import { getMockReview, getFallbackReview } from "./mock/mockHelpers";
 import { areApiKeysConfigured } from "@/config/api";
+import { API_CONFIG } from "@/config/api";
 
 export const getMovieReviews = async (movieId: number): Promise<Review[]> => {
   // Simulate API call delay
@@ -25,9 +27,9 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
       throw new Error('Movie not found');
     }
     
-    // Check if OpenRouter API key is configured
+    // Check if API keys are configured
     const apiConfigured = areApiKeysConfigured();
-    console.log("OpenRouter API configured:", apiConfigured);
+    console.log("API keys configured:", apiConfigured);
     
     // Try to get from mock data first (if not forcing refresh and mock data exists)
     if (!forceRefresh && !apiConfigured && mockAIReviews[movieId]) {
@@ -37,32 +39,69 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
     
     // If we have API key or force refresh, try to generate a real review
     if (apiConfigured || forceRefresh) {
-      console.log("Attempting to generate AI review with OpenRouter API");
+      console.log("Attempting to generate AI review with available APIs");
+      
+      // Determine which API to use based on available keys
+      const openRouterKey = API_CONFIG.openrouter.apiKey;
+      const perplexityKey = API_CONFIG.perplexity.apiKey;
+      const hasOpenRouter = !!openRouterKey && openRouterKey.length > 10;
+      const hasPerplexity = !!perplexityKey && perplexityKey.length > 10;
       
       try {
-        // Use OpenRouter API for review generation
-        const review = await generateOpenRouterReview(movieData.title, {
-          plot: movieData.overview,
-          genres: movieData.genres,
-          ratings: movieData.platformRatings.map(r => ({
-            source: r.platform,
-            value: `${r.score}/${r.outOf}`
-          })),
-          releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
-          director: movieData.director,
-          actors: movieData.cast
-        });
+        // First try OpenRouter if available
+        if (hasOpenRouter) {
+          console.log("Trying OpenRouter API for review generation");
+          try {
+            const review = await generateOpenRouterReview(movieData.title, {
+              plot: movieData.overview,
+              genres: movieData.genres,
+              ratings: movieData.platformRatings.map(r => ({
+                source: r.platform,
+                value: `${r.score}/${r.outOf}`
+              })),
+              releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
+              director: movieData.director,
+              actors: movieData.cast
+            });
+            
+            console.log("OpenRouter API review generation successful");
+            return review;
+          } catch (openRouterError) {
+            console.error("OpenRouter API failed:", openRouterError);
+            // Fall through to try Perplexity if available
+          }
+        }
         
-        console.log("AI review generation successful");
-        return review;
+        // Try Perplexity as fallback
+        if (hasPerplexity) {
+          console.log("Trying Perplexity API for review generation");
+          const review = await generatePerplexityReview(movieData.title, {
+            plot: movieData.overview,
+            genres: movieData.genres,
+            ratings: movieData.platformRatings.map(r => ({
+              source: r.platform,
+              value: `${r.score}/${r.outOf}`
+            })),
+            releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
+            director: movieData.director,
+            actors: movieData.cast
+          });
+          
+          console.log("Perplexity API review generation successful");
+          return review;
+        }
+        
+        // If we get here, all API attempts failed
+        throw new Error("All available APIs failed to generate a review");
+        
       } catch (apiError) {
-        console.error("OpenRouter API failed:", apiError);
-        throw new Error("OpenRouter API failed to generate review");
+        console.error("All API attempts failed:", apiError);
+        throw new Error("Failed to generate review with available APIs");
       }
     }
     
     // If we get here, no API key is configured and we need a mock review
-    console.log("No OpenRouter API key configured, using mock review");
+    console.log("No API keys configured, using mock review");
     return getMockReview(movieId.toString());
     
   } catch (error) {

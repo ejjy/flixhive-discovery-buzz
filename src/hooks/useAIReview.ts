@@ -15,7 +15,8 @@ export const useAIReview = (movie: Movie) => {
   const [hasError, setHasError] = useState(false);
   const [apiKeyState, setApiKeyState] = useState({
     configured: false,
-    key: ''
+    openRouter: '',
+    perplexity: ''
   });
 
   // Check API configuration on mount
@@ -23,16 +24,21 @@ export const useAIReview = (movie: Movie) => {
     const configured = areApiKeysConfigured();
     setApiKeyState({
       configured,
-      key: API_CONFIG.openrouter.apiKey || ''
+      openRouter: API_CONFIG.openrouter.apiKey || '',
+      perplexity: API_CONFIG.perplexity.apiKey || ''
     });
     
     if (!configured) {
-      console.log("OpenRouter API key not properly configured:", 
-                 API_CONFIG.openrouter.apiKey ? 
-                 `Key exists but may be invalid (length: ${API_CONFIG.openrouter.apiKey.length})` : 
-                 'Key not found');
+      console.log("AI API keys not properly configured:", {
+        openRouter: API_CONFIG.openrouter.apiKey ? 
+                   `Key exists but may be invalid (length: ${API_CONFIG.openrouter.apiKey.length})` : 
+                   'Key not found',
+        perplexity: API_CONFIG.perplexity.apiKey ? 
+                   `Key exists but may be invalid (length: ${API_CONFIG.perplexity.apiKey.length})` : 
+                   'Key not found'
+      });
     } else {
-      console.log("OpenRouter API key is configured correctly");
+      console.log("At least one API key is configured correctly");
     }
   }, []);
 
@@ -46,12 +52,11 @@ export const useAIReview = (movie: Movie) => {
       // Check if API key is configured
       const apiConfigured = areApiKeysConfigured();
       console.log("API Keys configuration check result:", apiConfigured);
-      console.log("API Key length:", API_CONFIG.openrouter.apiKey?.length || 0);
       
       // If no API key is set, we know we'll get a mock review
       if (!apiConfigured) {
         setIsMockReview(true);
-        console.log("Setting to mock review due to missing or invalid API key");
+        console.log("Setting to mock review due to missing or invalid API keys");
       }
       
       // Check if it's a newly discovered movie (ID > 1000) or forced refresh
@@ -74,20 +79,22 @@ export const useAIReview = (movie: Movie) => {
         !apiConfigured || 
         (reviewData.summary && (
           reviewData.summary.includes("mock review") || 
-          reviewData.summary.includes("API key is not configured") ||
-          reviewData.summary.includes("API key not set") ||
-          reviewData.summary.includes("API keys are not configured")
+          reviewData.summary.includes("API key") ||
+          reviewData.summary.includes("API credentials")
         ))
       ) {
         setIsMockReview(true);
-        console.log("Using mock review data - OpenRouter API key not properly configured");
+        console.log("Using mock review data - API keys not properly configured");
         toast({
           title: "API Key Issue",
-          description: `Using mock review data. Your OpenRouter API key may be invalid or missing.`,
+          description: `Using mock review data. Add either OpenRouter or Perplexity API key in Netlify environment variables.`,
           variant: "destructive",
           duration: 5000,
         });
-      } else if (reviewData.summary && reviewData.summary.includes("couldn't generate")) {
+      } else if (reviewData.summary && (
+        reviewData.summary.includes("couldn't generate") ||
+        reviewData.summary.includes("couldn't complete")
+      )) {
         setHasError(true);
         toast({
           title: "Review Generation Issue",

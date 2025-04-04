@@ -31,7 +31,7 @@ const AIReviewHeader: React.FC<AIReviewHeaderProps> = ({
       {isMockReview && (
         <div className="ml-auto flex items-center gap-2 text-yellow-500">
           <Key className="h-4 w-4" />
-          <span className="text-sm">Mock Review (Check OpenRouter API key in Netlify)</span>
+          <span className="text-sm">Mock Review (Configure API key in Netlify)</span>
         </div>
       )}
       {hasError && (
