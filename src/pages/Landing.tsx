@@ -53,7 +53,7 @@ const Landing = () => {
         
         <div className="flex flex-col sm:flex-row gap-4 relative z-10">
           <SignUpButton mode="modal">
-            <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-white">
+            <Button size="lg" className="border-white/30 text-white hover:bg-white/10 bg-transparent border">
               Get Started
             </Button>
           </SignUpButton>

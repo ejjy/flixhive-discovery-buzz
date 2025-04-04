@@ -69,9 +69,15 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
     console.error('Error generating AI review:', error);
     
     // Make sure we have a movie title to pass to getFallbackReview
-    const movieTitle = typeof movieId === 'number' ? 
-      (await getMovieById(movieId))?.title || `Movie ${movieId}` : 
-      movieId;
+    let movieTitle = `Movie ${movieId}`;
+    try {
+      const movie = await getMovieById(movieId);
+      if (movie && movie.title) {
+        movieTitle = movie.title;
+      }
+    } catch (e) {
+      console.error("Couldn't get movie title:", e);
+    }
       
     return getFallbackReview(movieTitle);
   }

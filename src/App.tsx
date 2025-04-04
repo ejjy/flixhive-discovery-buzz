@@ -104,6 +104,25 @@ const App = () => (
         }
       }
     }}
+    signUpProps={{
+      initialValues: {
+        emailAddress: '',
+      },
+      signInUrl: '/sign-in',
+    }}
+    signInProps={{
+      initialValues: {
+        identifier: '',
+      },
+      signUpUrl: '/sign-up',
+      redirectUrl: '/dashboard',
+    }}
+    gdprSettings={{
+      allowedExternalReferrers: ["*.lovableproject.com", "*.flixhive.in"],
+      trustedOrigins: ["*.lovableproject.com", "*.flixhive.in"]
+    }}
+    socialAuthSignUpUrl="/sign-up"
+    socialAuthSignInUrl="/sign-in"
   >
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
