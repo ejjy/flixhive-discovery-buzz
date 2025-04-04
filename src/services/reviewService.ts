@@ -26,9 +26,18 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
       return getFallbackReview(`Movie ID: ${movieId}`);
     }
     
-    // Check if API keys are configured
+    // Check if API keys are configured and log detailed information
     const apiConfigured = areApiKeysConfigured();
-    console.log("API keys configured:", apiConfigured);
+    const apiKey = API_CONFIG.openrouter.apiKey;
+    
+    console.log("API configuration check:", {
+      apiConfigured,
+      keyExists: !!apiKey,
+      keyLength: apiKey?.length || 0,
+      keyStart: apiKey ? apiKey.substring(0, 3) : 'none',
+      mockDataExists: !!mockAIReviews[movieId],
+      forceRefresh
+    });
     
     // If we don't have API keys configured and we have mock data, use it
     if (!apiConfigured && !forceRefresh && mockAIReviews[movieId]) {
@@ -59,7 +68,7 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
             actors: movieData.cast || []
           });
           
-          console.log("OpenRouter API review generation successful");
+          console.log("OpenRouter API review generation successful", review);
           return review;
         } else {
           console.log("No API keys configured, using mock review");

@@ -17,9 +17,12 @@ export const generateOpenRouterReview = async (
   try {
     // Check if API key is configured
     const apiKey = API_CONFIG.openrouter.apiKey;
-    if (!apiKey || apiKey.length < 10) {
-      console.error('OpenRouter API key not properly configured');
-      throw new Error('OpenRouter API credentials not configured correctly');
+    
+    if (!apiKey || apiKey.length < 10 || apiKey.includes('placeholder')) {
+      console.error('OpenRouter API key not properly configured:', 
+        apiKey ? `Key starts with ${apiKey.substring(0, 3)}... (${apiKey.length} chars)` : 'No key found');
+      
+      throw new Error('OpenRouter API key not configured or invalid');
     }
 
     console.log("Starting OpenRouter API request for movie review:", movieTitle);
@@ -75,19 +78,23 @@ export const generateOpenRouterReview = async (
       })
     });
 
+    // Log the response status for debugging
+    console.log("OpenRouter API response status:", response.status);
+
     if (!response.ok) {
-      console.error(`OpenRouter API failed with status: ${response.status}`);
-      throw new Error(`OpenRouter API failed with status: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`OpenRouter API failed with status: ${response.status}`, errorText);
+      throw new Error(`OpenRouter API failed with status: ${response.status} - ${errorText.substring(0, 100)}`);
     }
 
     const data = await response.json();
-    console.log("OpenRouter API response received");
+    console.log("OpenRouter API response received:", data);
     
     // Extract and parse the JSON response
     const content = data.choices?.[0]?.message?.content;
     if (!content) {
-      console.error('Invalid response from OpenRouter API');
-      throw new Error('Invalid response from OpenRouter API');
+      console.error('Invalid response from OpenRouter API', data);
+      throw new Error('Invalid response from OpenRouter API - no content in response');
     }
     
     // Handle potential JSON in markdown code blocks
@@ -117,6 +124,6 @@ export const generateOpenRouterReview = async (
     }
   } catch (error) {
     console.error('Error using OpenRouter API:', error);
-    return getFallbackReview(movieTitle);
+    return getMockReview(movieTitle);
   }
 };

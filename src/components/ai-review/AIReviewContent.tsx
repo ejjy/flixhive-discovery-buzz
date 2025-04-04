@@ -7,6 +7,7 @@ import AIReviewProsConsSection from './AIReviewProsConsSection';
 import AIReviewFooter from './AIReviewFooter';
 import { AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 
 interface AIReviewContentProps {
   movie: Movie;
@@ -27,6 +28,16 @@ const AIReviewContent: React.FC<AIReviewContentProps> = ({
   const cons = Array.isArray(aiReview?.cons) ? aiReview.cons : [];
   const watchRecommendation = aiReview?.watchRecommendation || "No recommendation available";
   
+  const handleOpenEnvFile = () => {
+    // Open a separate modal or alert explaining how to set up the API key
+    alert(`To enable real AI movie reviews:
+1. Create an API key at https://openrouter.ai
+2. Add the key to your .env file as VITE_OPENROUTER_API_KEY=your_key_here
+3. Restart the development server
+
+Current value: ${import.meta.env.VITE_OPENROUTER_API_KEY || 'Not set'}`);
+  };
+  
   return (
     <Card className="p-6 bg-flixhive-gray/30 border border-white/10">
       <div className="space-y-4">
@@ -35,6 +46,27 @@ const AIReviewContent: React.FC<AIReviewContentProps> = ({
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               There was a problem generating the AI review. Some information may be incomplete.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {isMockReview && (
+          <Alert variant="warning" className="bg-yellow-900/20 border border-yellow-500/30">
+            <AlertTriangle className="h-4 w-4 text-yellow-500" />
+            <AlertDescription className="flex flex-col gap-3">
+              <div>
+                <span className="font-bold text-yellow-500">API Key Not Configured</span>
+                <p className="text-white/80 mt-1">
+                  You're seeing a mock review because the OpenRouter API key is not properly set.
+                </p>
+              </div>
+              <Button 
+                variant="outline" 
+                className="w-full border-yellow-500/50 text-yellow-500 hover:text-yellow-400" 
+                onClick={handleOpenEnvFile}
+              >
+                How to Set Up API Key
+              </Button>
             </AlertDescription>
           </Alert>
         )}
