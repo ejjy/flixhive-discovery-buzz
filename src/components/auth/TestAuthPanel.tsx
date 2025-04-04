@@ -164,7 +164,7 @@ export default function TestAuthPanel() {
       </CardHeader>
       <CardContent>
         {!isFirebaseConfigComplete() && (
-          <Alert variant="warning" className="mb-4">
+          <Alert variant="default" className="mb-4">
             <Info className="h-4 w-4" />
             <AlertTitle>Configuration Notice</AlertTitle>
             <AlertDescription>
