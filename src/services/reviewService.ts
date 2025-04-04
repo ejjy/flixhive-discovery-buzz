@@ -23,7 +23,6 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
     
     if (!movieData) {
       console.error(`Movie not found with ID: ${movieId}`);
-      // Instead of throwing an error, return a fallback review
       return getFallbackReview(`Movie ID: ${movieId}`);
     }
     
@@ -31,54 +30,41 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
     const apiConfigured = areApiKeysConfigured();
     console.log("API keys configured:", apiConfigured);
     
-    // Try to get from mock data first (if not forcing refresh and mock data exists)
-    if (!forceRefresh && !apiConfigured && mockAIReviews[movieId]) {
-      console.log("Using mock review from data store (no API key configured)");
+    // If we don't have API keys configured and we have mock data, use it
+    if (!apiConfigured && !forceRefresh && mockAIReviews[movieId]) {
+      console.log("Using mock review from data store");
       return mockAIReviews[movieId];
     }
     
-    // If we have API key or force refresh, try to generate a real review
+    // If we need to generate a real review or a mock review
     if (apiConfigured || forceRefresh) {
-      console.log("Attempting to generate AI review with available APIs");
+      console.log("Attempting to generate AI review");
       
       // Check if it's a newly discovered movie (ID > 1000)
       const isNewlyDiscovered = movieId > 1000;
-      if (isNewlyDiscovered) {
-        console.log("This is a newly discovered movie, generating fresh review");
-      }
-      
-      // Determine which API to use based on available keys
-      const openRouterKey = API_CONFIG.openrouter.apiKey;
-      const hasOpenRouter = !!openRouterKey && openRouterKey.length > 10;
       
       try {
-        // Prioritize OpenRouter API
-        if (hasOpenRouter) {
+        if (apiConfigured) {
+          // Use OpenRouter to generate a review
           console.log("Using OpenRouter API for review generation");
-          try {
-            const review = await generateOpenRouterReview(movieData.title, {
-              plot: movieData.overview,
-              genres: movieData.genres,
-              ratings: movieData.platformRatings?.map(r => ({
-                source: r.platform,
-                value: `${r.score}/${r.outOf}`
-              })) || [],
-              releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
-              director: movieData.director || "Unknown Director",
-              actors: movieData.cast || []
-            });
-            
-            console.log("OpenRouter API review generation successful");
-            return review;
-          } catch (openRouterError) {
-            console.error("OpenRouter API failed:", openRouterError);
-            throw openRouterError;
-          }
+          const review = await generateOpenRouterReview(movieData.title, {
+            plot: movieData.overview,
+            genres: movieData.genres,
+            ratings: movieData.platformRatings?.map(r => ({
+              source: r.platform,
+              value: `${r.score}/${r.outOf}`
+            })) || [],
+            releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
+            director: movieData.director || "Unknown Director",
+            actors: movieData.cast || []
+          });
+          
+          console.log("OpenRouter API review generation successful");
+          return review;
         } else {
-          console.log("OpenRouter API key not configured properly");
-          throw new Error("OpenRouter API key not configured");
+          console.log("No API keys configured, using mock review");
+          return getMockReview(movieData.title);
         }
-        
       } catch (apiError) {
         console.error("API attempt failed:", apiError);
         // Generate a fallback review for the movie
@@ -86,9 +72,9 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
       }
     }
     
-    // If we get here, no API key is configured or API failed and we need a mock review
-    console.log("No API keys configured or API failed, using mock review");
-    return getMockReview(movieId.toString());
+    // Default to mock review
+    console.log("Using default mock review");
+    return getMockReview(movieData.title);
     
   } catch (error) {
     console.error('Error generating AI review:', error);

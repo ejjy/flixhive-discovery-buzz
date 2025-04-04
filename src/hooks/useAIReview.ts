@@ -24,9 +24,9 @@ export const useAIReview = (movie: Movie) => {
     const openRouterKey = API_CONFIG.openrouter.apiKey || '';
     const configured = areApiKeysConfigured();
     
-    console.log("OpenRouter API Key validation:", {
-      keyExists: !!openRouterKey,
-      keyLength: openRouterKey?.length,
+    console.log("API key validation:", {
+      openRouterKeyExists: !!openRouterKey,
+      openRouterKeyLength: openRouterKey?.length || 0,
       configured
     });
     
@@ -46,10 +46,9 @@ export const useAIReview = (movie: Movie) => {
     
     setIsLoading(true);
     
-    // Determine if we need to generate a new review or if we're dealing with a populated movie
-    const isPopulatedMovie = isMoviePopulated(movie.id);
+    // Determine if we need to generate a new review
     const isNewDiscovery = movie.id > 1000;
-    const shouldGenerate = isNewDiscovery || forceRefresh || isPopulatedMovie;
+    const shouldGenerate = isNewDiscovery || forceRefresh;
     
     setIsGenerating(shouldGenerate);
     setIsMockReview(false);
@@ -59,41 +58,39 @@ export const useAIReview = (movie: Movie) => {
       // Check if API key is configured
       const apiConfigured = areApiKeysConfigured();
       console.log("API keys configured:", apiConfigured);
-      console.log("API Key length:", API_CONFIG.openrouter.apiKey?.length);
       
       // If no API key is set, we know we'll get a mock review
       if (!apiConfigured) {
         setIsMockReview(true);
-        console.log("Setting to mock review due to missing or invalid OpenRouter API key");
+        console.log("Will use mock review due to missing API key");
       }
       
       // Show appropriate toasts based on the context
       if (isNewDiscovery) {
         toast({
           title: "Generating AI Review",
-          description: `Creating a new review for "${movie.title}" using AI...`,
+          description: `Creating a new review for "${movie.title}"...`,
           duration: 5000,
         });
       } else if (forceRefresh) {
         toast({
           title: "Refreshing AI Review",
-          description: `Creating a fresh review for "${movie.title}" using AI...`,
+          description: `Creating a fresh review for "${movie.title}"...`,
           duration: 5000,
-        });
-      } else if (isPopulatedMovie) {
-        toast({
-          title: "Loading Movie Review",
-          description: `Loading AI review for "${movie.title}"...`,
-          duration: 3000,
         });
       }
       
       console.log("Calling getAIReview for movie:", movie.title, "with ID:", movie.id);
       const reviewData = await getAIReview(movie.id, forceRefresh);
-      console.log("Review data received:", reviewData ? "Success" : "Failed");
+      console.log("Review data received:", reviewData);
+      
+      if (!reviewData) {
+        throw new Error("Failed to get review data");
+      }
+      
       setAiReview(reviewData);
       
-      // Check if this is a mock review by examining content
+      // Check if this is a mock review
       if (
         !apiConfigured || 
         (reviewData.summary && (
@@ -104,18 +101,19 @@ export const useAIReview = (movie: Movie) => {
       ) {
         setIsMockReview(true);
         console.log("Using mock review data");
+        
         if (!apiConfigured) {
           toast({
-            title: "API Key Issue",
-            description: `Using mock review data. Add OpenRouter API key in Netlify environment variables.`,
+            title: "API Key Missing",
+            description: `Using mock review data. Add OpenRouter API key in environment variables.`,
             variant: "destructive",
             duration: 5000,
           });
         }
-      } else if (reviewData.summary && (
+      } else if (reviewData.error || (reviewData.summary && (
         reviewData.summary.includes("couldn't generate") ||
         reviewData.summary.includes("couldn't complete")
-      )) {
+      ))) {
         setHasError(true);
         toast({
           title: "Review Generation Issue",
@@ -126,7 +124,7 @@ export const useAIReview = (movie: Movie) => {
       } else if (isNewDiscovery || forceRefresh) {
         toast({
           title: "AI Review Ready",
-          description: `We've created a detailed review for "${movie.title}" with AI`,
+          description: `We've created a review for "${movie.title}"`,
           duration: 3000,
         });
       }
