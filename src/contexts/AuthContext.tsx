@@ -92,6 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await createTestUser();
       } catch (error) {
         console.error("Failed to create test user:", error);
+        // Don't throw error, just log it
       }
     };
     
