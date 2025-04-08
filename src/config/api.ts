@@ -14,23 +14,37 @@ export const API_CONFIG = {
   }
 };
 
-// Helper to check if API keys are configured
+// Helper to check if any API keys are properly configured
 export const areApiKeysConfigured = () => {
-  // Check OpenRouter API key since that's our primary service
   const openRouterKey = API_CONFIG.openrouter.apiKey;
+  const perplexityKey = API_CONFIG.perplexity.apiKey;
+  const geminiKey = API_CONFIG.gemini.apiKey;
   
-  // Add detailed console logging for debugging
-  console.log("OpenRouter API Key validation:", {
-    exists: !!openRouterKey,
-    length: openRouterKey?.length || 0,
-    isEmpty: openRouterKey === '',
-    isPlaceholder: openRouterKey.includes('placeholder'),
-    value: openRouterKey ? `${openRouterKey.substring(0, 5)}...${openRouterKey.substring(openRouterKey.length - 3) || ''}` : 'none',
-    envVariable: 'VITE_OPENROUTER_API_KEY',
+  console.log("API Key validation:", {
+    openRouter: {
+      exists: !!openRouterKey,
+      length: openRouterKey?.length || 0,
+      valid: openRouterKey && openRouterKey.length > 10,
+      value: openRouterKey ? `${openRouterKey.substring(0, 5)}...` : 'none'
+    },
+    perplexity: {
+      exists: !!perplexityKey,
+      length: perplexityKey?.length || 0,
+      valid: perplexityKey && perplexityKey.length > 10,
+      value: perplexityKey ? `${perplexityKey.substring(0, 5)}...` : 'none'
+    },
+    gemini: {
+      exists: !!geminiKey,
+      length: geminiKey?.length || 0,
+      valid: geminiKey && geminiKey.length > 10,
+      value: geminiKey ? `${geminiKey.substring(0, 5)}...` : 'none'
+    }
   });
-
-  // Key must exist, not be empty, and be reasonably long to be valid
-  return !!openRouterKey && 
-         openRouterKey.length > 10 && 
-         !openRouterKey.includes('placeholder');
+  
+  // Return true if any API key is valid
+  return (
+    (!!openRouterKey && openRouterKey.length > 10) ||
+    (!!perplexityKey && perplexityKey.length > 10) ||
+    (!!geminiKey && geminiKey.length > 10 && geminiKey.startsWith('AI'))
+  );
 };

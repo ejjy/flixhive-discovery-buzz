@@ -25,19 +25,19 @@ const AIReviewHeader: React.FC<AIReviewHeaderProps> = ({
       {isGenerating && (
         <div className="ml-auto flex items-center gap-2 text-flixhive-accent animate-pulse">
           <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="text-sm">Generating review with OpenRouter...</span>
+          <span className="text-sm">Generating review with AI...</span>
         </div>
       )}
       {isMockReview && (
         <div className="ml-auto flex items-center gap-2 text-yellow-500">
           <Key className="h-4 w-4" />
-          <span className="text-sm">Mock Review (Configure OpenRouter API key in Netlify)</span>
+          <span className="text-sm">Mock Review (Configure API key in .env)</span>
         </div>
       )}
       {hasError && (
         <div className="ml-auto flex items-center gap-2 text-red-500">
           <AlertTriangle className="h-4 w-4" />
-          <span className="text-sm">OpenRouter API Review Generation Issue</span>
+          <span className="text-sm">AI Review Generation Issue</span>
         </div>
       )}
       {!isGenerating && (

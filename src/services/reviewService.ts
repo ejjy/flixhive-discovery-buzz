@@ -2,6 +2,8 @@
 import { Review, AIReview } from "@/types/movie";
 import { getMovieById } from "./movieListService";
 import { generateOpenRouterReview } from "./openRouterService";
+import { generatePerplexityReview } from "./perplexityService";
+import { generateAIReview as generateGeminiReview } from "./geminiService";
 import { mockReviews, mockAIReviews } from "./mock/mockData";
 import { getMockReview, getFallbackReview } from "./mock/mockHelpers";
 import { areApiKeysConfigured } from "@/config/api";
@@ -26,15 +28,26 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
       return getFallbackReview(`Movie ID: ${movieId}`);
     }
     
-    // Check if API keys are configured and log detailed information
+    // Log available API keys for debugging
+    const openRouterKey = API_CONFIG.openrouter.apiKey;
+    const perplexityKey = API_CONFIG.perplexity.apiKey;
+    const geminiKey = API_CONFIG.gemini.apiKey;
+    
+    console.log("API Keys available:", {
+      openRouter: !!openRouterKey && openRouterKey.length > 10,
+      perplexity: !!perplexityKey && perplexityKey.length > 10,
+      gemini: !!geminiKey && geminiKey.length > 10
+    });
+    
+    // Check if API keys are configured
     const apiConfigured = areApiKeysConfigured();
-    const apiKey = API_CONFIG.openrouter.apiKey;
     
     console.log("API configuration check:", {
       apiConfigured,
-      keyExists: !!apiKey,
-      keyLength: apiKey?.length || 0,
-      keyStart: apiKey ? apiKey.substring(0, 3) : 'none',
+      openRouterKeyExists: !!openRouterKey,
+      openRouterKeyLength: openRouterKey?.length || 0,
+      perplexityKeyExists: !!perplexityKey,
+      perplexityKeyLength: perplexityKey?.length || 0,
       mockDataExists: !!mockAIReviews[movieId],
       forceRefresh
     });
@@ -45,44 +58,97 @@ export const getAIReview = async (movieId: number, forceRefresh = false): Promis
       return mockAIReviews[movieId];
     }
     
-    // If we need to generate a real review or a mock review
+    // If we need to generate a review (real or mock)
     if (apiConfigured || forceRefresh) {
       console.log("Attempting to generate AI review");
       
-      // Check if it's a newly discovered movie (ID > 1000)
-      const isNewlyDiscovered = movieId > 1000;
-      
       try {
-        if (apiConfigured) {
-          // Use OpenRouter to generate a review
-          console.log("Using OpenRouter API for review generation");
-          const review = await generateOpenRouterReview(movieData.title, {
-            plot: movieData.overview,
-            genres: movieData.genres,
-            ratings: movieData.platformRatings?.map(r => ({
-              source: r.platform,
-              value: `${r.score}/${r.outOf}`
-            })) || [],
-            releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
-            director: movieData.director || "Unknown Director",
-            actors: movieData.cast || []
-          });
-          
-          console.log("OpenRouter API review generation successful", review);
-          return review;
-        } else {
-          console.log("No API keys configured, using mock review");
-          return getMockReview(movieData.title);
+        // Try all available AI services in order
+        
+        // 1. Try OpenRouter first if available
+        if (openRouterKey && openRouterKey.length > 10) {
+          try {
+            console.log("Using OpenRouter API for review generation");
+            const review = await generateOpenRouterReview(movieData.title, {
+              plot: movieData.overview,
+              genres: movieData.genres,
+              ratings: movieData.platformRatings?.map(r => ({
+                source: r.platform,
+                value: `${r.score}/${r.outOf}`
+              })) || [],
+              releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
+              director: movieData.director || "Unknown Director",
+              actors: movieData.cast || []
+            });
+            
+            console.log("OpenRouter API review generation successful", review);
+            return review;
+          } catch (openRouterError) {
+            console.error("OpenRouter attempt failed:", openRouterError);
+            // Continue to next service
+          }
         }
+        
+        // 2. Try Perplexity if available
+        if (perplexityKey && perplexityKey.length > 10) {
+          try {
+            console.log("Using Perplexity API for review generation");
+            const review = await generatePerplexityReview(movieData.title, {
+              plot: movieData.overview,
+              genres: movieData.genres,
+              ratings: movieData.platformRatings?.map(r => ({
+                source: r.platform,
+                value: `${r.score}/${r.outOf}`
+              })) || [],
+              releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
+              director: movieData.director || "Unknown Director",
+              actors: movieData.cast || []
+            });
+            
+            console.log("Perplexity API review generation successful", review);
+            return review;
+          } catch (perplexityError) {
+            console.error("Perplexity attempt failed:", perplexityError);
+            // Continue to next service
+          }
+        }
+        
+        // 3. Try Gemini if available
+        if (geminiKey && geminiKey.length > 10) {
+          try {
+            console.log("Using Gemini API for review generation");
+            const review = await generateGeminiReview(movieData.title, {
+              plot: movieData.overview,
+              genres: movieData.genres,
+              ratings: movieData.platformRatings?.map(r => ({
+                source: r.platform,
+                value: `${r.score}/${r.outOf}`
+              })) || [],
+              releaseYear: movieData.releaseDate ? new Date(movieData.releaseDate).getFullYear().toString() : "",
+              director: movieData.director || "Unknown Director",
+              actors: movieData.cast || []
+            });
+            
+            console.log("Gemini API review generation successful", review);
+            return review;
+          } catch (geminiError) {
+            console.error("Gemini attempt failed:", geminiError);
+            // All services failed
+          }
+        }
+        
+        // If we get here, all API attempts failed
+        console.log("All API attempts failed, using mock review");
+        return getMockReview(movieData.title);
       } catch (apiError) {
-        console.error("API attempt failed:", apiError);
+        console.error("All API attempts failed with error:", apiError);
         // Generate a fallback review for the movie
         return getFallbackReview(movieData.title);
       }
     }
     
-    // Default to mock review
-    console.log("Using default mock review");
+    // Default to mock review if no API keys are configured
+    console.log("No API keys configured, using default mock review");
     return getMockReview(movieData.title);
     
   } catch (error) {

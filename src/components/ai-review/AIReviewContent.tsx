@@ -29,13 +29,27 @@ const AIReviewContent: React.FC<AIReviewContentProps> = ({
   const watchRecommendation = aiReview?.watchRecommendation || "No recommendation available";
   
   const handleOpenEnvFile = () => {
-    // Open a separate modal or alert explaining how to set up the API key
-    alert(`To enable real AI movie reviews:
-1. Create an API key at https://openrouter.ai
-2. Add the key to your .env file as VITE_OPENROUTER_API_KEY=your_key_here
-3. Restart the development server
+    // Show instructions for setting up API keys
+    alert(`To enable real AI movie reviews, add one of these API keys to your .env file:
 
-Current value: ${import.meta.env.VITE_OPENROUTER_API_KEY || 'Not set'}`);
+1. OpenRouter API:
+   - Create an API key at https://openrouter.ai
+   - Add VITE_OPENROUTER_API_KEY=your_key_here to .env
+
+2. Perplexity API:
+   - Get an API key from https://perplexity.ai
+   - Add VITE_PERPLEXITY_API_KEY=your_key_here to .env
+
+3. Gemini API:
+   - Get a key from https://ai.google.dev
+   - Add VITE_GEMINI_API_KEY=your_key_here to .env
+   
+After adding a key, restart the development server.
+
+Current keys configured:
+- OpenRouter: ${import.meta.env.VITE_OPENROUTER_API_KEY ? 'Yes (length: ' + import.meta.env.VITE_OPENROUTER_API_KEY.length + ')' : 'No'}
+- Perplexity: ${import.meta.env.VITE_PERPLEXITY_API_KEY ? 'Yes (length: ' + import.meta.env.VITE_PERPLEXITY_API_KEY.length + ')' : 'No'}
+- Gemini: ${import.meta.env.VITE_GEMINI_API_KEY ? 'Yes (length: ' + import.meta.env.VITE_GEMINI_API_KEY.length + ')' : 'No'}`);
   };
   
   return (
@@ -55,9 +69,9 @@ Current value: ${import.meta.env.VITE_OPENROUTER_API_KEY || 'Not set'}`);
             <AlertTriangle className="h-4 w-4 text-yellow-500" />
             <AlertDescription className="flex flex-col gap-3">
               <div>
-                <span className="font-bold text-yellow-500">API Key Not Configured</span>
+                <span className="font-bold text-yellow-500">AI API Key Not Configured</span>
                 <p className="text-white/80 mt-1">
-                  You're seeing a mock review because the OpenRouter API key is not properly set.
+                  You're seeing a mock review because no valid API key for AI reviews is properly set.
                 </p>
               </div>
               <Button 
@@ -65,7 +79,7 @@ Current value: ${import.meta.env.VITE_OPENROUTER_API_KEY || 'Not set'}`);
                 className="w-full border-yellow-500/50 text-yellow-500 hover:text-yellow-400" 
                 onClick={handleOpenEnvFile}
               >
-                How to Set Up API Key
+                How to Configure API Keys
               </Button>
             </AlertDescription>
           </Alert>
