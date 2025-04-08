@@ -94,9 +94,9 @@ const Dashboard = () => {
             });
           }
           
-          // Pre-fetch the AI review for better UX
+          // Pre-fetch the AI review for better UX - UPDATE: now passing full movie object
           setSearchProgress(80);
-          await getAIReview(foundMovie.id, isNewDiscovery);
+          await getAIReview(foundMovie, isNewDiscovery);
           setSearchProgress(100);
         } else {
           setSearchedMovie(null);

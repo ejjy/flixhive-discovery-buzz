@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Navbar from '@/components/navbar';
@@ -32,7 +33,7 @@ const PlatformBadge = ({ platform }: { platform: string }) => {
 const OTTPlatforms = ({ movie }: { movie: Movie }) => {
   const { data: aiReview, isLoading } = useQuery({
     queryKey: ['aiReview', movie.id],
-    queryFn: () => getAIReview(movie.id),
+    queryFn: () => getAIReview(movie, false),
   });
 
   if (isLoading) {
