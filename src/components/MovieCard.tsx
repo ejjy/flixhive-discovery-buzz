@@ -20,6 +20,10 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, className }) => {
           alt={movie.title}
           className="w-full h-full object-cover"
           loading="lazy"
+          onError={(e) => { 
+            const target = e.target as HTMLImageElement;
+            target.src = '/placeholder.svg'; 
+          }}
         />
         <div className="movie-card-overlay"></div>
         <div className="movie-card-content">

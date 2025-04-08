@@ -19,6 +19,10 @@ const MoviePoster: React.FC<MoviePosterProps> = ({ movie, isSaved, onToggleSave 
         src={movie.posterPath}
         alt={movie.title}
         className="w-full rounded-lg shadow-2xl"
+        onError={(e) => { 
+          const target = e.target as HTMLImageElement;
+          target.src = '/placeholder.svg'; 
+        }}
       />
       
       <div className="mt-6 space-y-4">

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Film, Loader2, AlertTriangle, RefreshCw, Key } from 'lucide-react';
+import { Film, Loader2, AlertTriangle, RefreshCw, Key, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface AIReviewHeaderProps {
@@ -24,7 +24,7 @@ const AIReviewHeader: React.FC<AIReviewHeaderProps> = ({
       <h2 className="text-2xl font-bold">{title} - AI Review</h2>
       {isGenerating && (
         <div className="ml-auto flex items-center gap-2 text-flixhive-accent animate-pulse">
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Activity className="h-4 w-4 animate-pulse" />
           <span className="text-sm">Generating review with AI...</span>
         </div>
       )}

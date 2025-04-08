@@ -81,8 +81,9 @@ export const useAIReview = (movie: Movie) => {
       }
       
       console.log("Calling getAIReview for movie:", movie.title, "with ID:", movie.id);
-      const reviewData = await getAIReview(movie.id, forceRefresh);
-      console.log("Review data received:", reviewData);
+      // Pass the full movie object instead of just the ID
+      const reviewData = await getAIReview(movie, forceRefresh);
+      console.log("✅ AI Review Received:", reviewData.summary || reviewData);
       
       if (!reviewData) {
         throw new Error("Failed to get review data");
