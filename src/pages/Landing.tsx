@@ -21,7 +21,8 @@ import {
   AlertTitle,
 } from "@/components/ui/alert";
 import { SearchSection } from '@/components/SearchSection';
-import { AIReviewSection } from '@/components/AIReviewSection';
+import AIReviewSection from '@/components/AIReviewSection';
+import { Movie } from '@/types/movie';
 
 const Landing = () => {
   const { isSignedIn, signIn, signUp, signInWithGoogle } = useAuth();
@@ -36,7 +37,7 @@ const Landing = () => {
     return <Navigate to="/home" replace />;
   }
 
-  const handleMovieSearch = async (movie: Movie) => {
+  const handleMovieSearch = async (movie: Movie | null) => {
     setSearchedMovie(movie);
     // Scroll to review section smoothly
     const reviewSection = document.getElementById('review-section');
