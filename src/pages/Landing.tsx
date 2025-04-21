@@ -4,7 +4,6 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { SearchSection } from '@/components/SearchSection';
 import AIReviewSection from '@/components/AIReviewSection';
-import { AuthForms } from '@/components/auth/AuthForms';
 import { FeaturesSection } from '@/components/landing/FeaturesSection';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { BackgroundElements } from '@/components/landing/BackgroundElements';
@@ -33,10 +32,6 @@ const Landing = () => {
         <BackgroundElements />
         
         <HeroSection />
-        
-        <div className="flex items-center justify-center relative z-10">
-          <AuthForms />
-        </div>
         
         {/* Search and Review Section */}
         <div className="w-full max-w-2xl mx-auto mt-8 mb-12">

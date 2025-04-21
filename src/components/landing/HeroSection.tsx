@@ -1,8 +1,6 @@
 
 import React from 'react';
-import { Film, Tv, Star, Clapperboard } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info } from 'lucide-react';
+import { Film } from 'lucide-react';
 
 export const HeroSection = () => {
   return (
@@ -20,17 +18,8 @@ export const HeroSection = () => {
         </h2>
         
         <p className="text-white/80 mb-6 max-w-xl relative z-10 text-center md:text-left">
-          Discover new movies, get personalized recommendations, and join a community of movie enthusiasts.
+          Discover new movies, get personalized recommendations.
         </p>
-        
-        <Alert className="bg-amber-500/20 border-amber-500/50 text-white mb-6">
-          <Info className="h-4 w-4" />
-          <AlertTitle>Test User Credentials</AlertTitle>
-          <AlertDescription>
-            Email: test@flixhive.com<br />
-            Password: password123
-          </AlertDescription>
-        </Alert>
       </div>
     </div>
   );
