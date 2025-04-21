@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Film, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -55,16 +54,17 @@ export const HeroSection = () => {
             />
           </div>
           
-          <Button 
-            type="submit"
-            className="w-full h-12 text-lg bg-amber-500 hover:bg-amber-600 text-white font-medium"
-          >
-            <Search className="w-5 h-5 mr-2" />
-            Find my wish
-          </Button>
+          <div className="flex justify-center">
+            <Button 
+              type="submit"
+              className="w-1/2 h-12 text-lg bg-amber-500 hover:bg-amber-600 text-white font-medium"
+            >
+              <Search className="w-5 h-5 mr-2" />
+              Find my wish
+            </Button>
+          </div>
         </form>
       </div>
     </div>
   );
 };
-
