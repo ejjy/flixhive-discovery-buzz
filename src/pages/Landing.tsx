@@ -1,30 +1,17 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { SearchSection } from '@/components/SearchSection';
-import AIReviewSection from '@/components/AIReviewSection';
-import { FeaturesSection } from '@/components/landing/FeaturesSection';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { BackgroundElements } from '@/components/landing/BackgroundElements';
-import type { Movie } from '@/types/movie';
+import { FeaturesSection } from '@/components/landing/FeaturesSection';
 
 const Landing = () => {
   const { isSignedIn } = useAuth();
-  const [searchedMovie, setSearchedMovie] = useState<Movie | null>(null);
 
   if (isSignedIn) {
     return <Navigate to="/home" replace />;
   }
-
-  const handleMovieSearch = async (movie: Movie | null) => {
-    setSearchedMovie(movie);
-    // Scroll to review section smoothly
-    const reviewSection = document.getElementById('review-section');
-    if (reviewSection) {
-      reviewSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-800 to-indigo-900 flex flex-col">
@@ -32,25 +19,6 @@ const Landing = () => {
         <BackgroundElements />
         
         <HeroSection />
-        
-        {/* Search and Review Section */}
-        <div className="w-full max-w-2xl mx-auto mt-8 mb-12">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-              Get AI-Powered Movie Reviews
-            </h2>
-            <p className="text-white/80">
-              Search for any movie to get instant, in-depth AI analysis and reviews
-            </p>
-          </div>
-          <SearchSection onMovieFound={handleMovieSearch} />
-        </div>
-        
-        {searchedMovie && (
-          <div id="review-section" className="w-full max-w-4xl mx-auto mt-8 px-4">
-            <AIReviewSection movie={searchedMovie} />
-          </div>
-        )}
       </div>
       
       <FeaturesSection />
