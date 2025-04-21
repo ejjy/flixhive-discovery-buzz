@@ -1,4 +1,3 @@
-
 import { Movie } from "@/types/movie";
 import { searchMoviesOmdb } from "./omdbService";
 import { mockMovies } from "./mock/mockData";
@@ -11,7 +10,8 @@ const processNaturalLanguageQuery = (query: string): {
   eras: string[],
   moods: string[],
   themes: string[],
-  impliedIntent: string
+  impliedIntent: string,
+  personType?: 'actor' | 'director' | 'celebrity'
 } => {
   // Common filler words to remove
   const fillerWords = [
@@ -74,6 +74,28 @@ const processNaturalLanguageQuery = (query: string): {
     { pattern: /(thought-provoking|makes you think|philosophical)/i, intent: "drama or documentary" },
     { pattern: /(like|similar to) (.+)/i, intent: "similar to $2" }
   ];
+  
+  // Add person-related keywords
+  const actorKeywords = ['actor', 'actress', 'star', 'cast', 'starring', 'plays', 'played by', 'featuring'];
+  const directorKeywords = ['director', 'directed by', 'filmmaker', 'film by', 'movies by'];
+  
+  // Detect if query is about a person
+  let personType: 'actor' | 'director' | 'celebrity' | undefined;
+  
+  const lowerQuery = query.toLowerCase();
+  
+  // Check if query contains person-related keywords
+  if (actorKeywords.some(keyword => lowerQuery.includes(keyword))) {
+    personType = 'actor';
+  } else if (directorKeywords.some(keyword => lowerQuery.includes(keyword))) {
+    personType = 'director';
+  } else {
+    // If no specific keyword but query looks like a name (2-3 words, no special chars)
+    const words = query.split(' ');
+    if (words.length <= 3 && words.every(word => /^[A-Za-z]+$/.test(word))) {
+      personType = 'celebrity';
+    }
+  }
   
   // Process the query
   const lowerQuery = query.toLowerCase();
@@ -145,53 +167,47 @@ const processNaturalLanguageQuery = (query: string): {
     eras: mentionedEras,
     moods: mentionedMoods,
     themes: mentionedThemes,
-    impliedIntent
+    impliedIntent,
+    personType
   };
 };
 
 export const searchMovies = async (query: string): Promise<Movie[]> => {
-  console.log(`Processing natural language query: "${query}"...`);
+  console.log(`Processing query: "${query}"...`);
   
   try {
-    // Process the natural language query with enhanced understanding
-    const { keyTerms, genres, eras, moods, themes, impliedIntent } = processNaturalLanguageQuery(query);
+    const { keyTerms, genres, eras, moods, themes, impliedIntent, personType } = processNaturalLanguageQuery(query);
     
-    console.log("Analysis of query:");
-    console.log("- Key terms:", keyTerms);
-    console.log("- Genres:", genres);
-    console.log("- Eras:", eras);
-    console.log("- Moods:", moods);
-    console.log("- Themes:", themes);
-    console.log("- Implied intent:", impliedIntent);
+    console.log("Analysis of query:", {
+      keyTerms, genres, eras, moods, themes, impliedIntent, personType
+    });
+
+    // First try with direct OMDB search
+    let results: Movie[] = [];
     
-    // First try with direct OMDB search using the implied intent
-    console.log(`Attempting OMDB API search with implied intent: "${impliedIntent}"`);
-    let results = await searchMoviesOmdb(impliedIntent);
+    if (personType) {
+      // If it's a person search, try different OMDB parameters based on person type
+      const searchParams = new URLSearchParams();
+      
+      if (personType === 'director') {
+        // Search by director
+        results = await searchMoviesOmdb(query, { searchBy: 'director' });
+      } else if (personType === 'actor' || personType === 'celebrity') {
+        // Search by actor name
+        results = await searchMoviesOmdb(query, { searchBy: 'actor' });
+        
+        if (results.length === 0 && personType === 'celebrity') {
+          // If no results as actor and it's a celebrity, try as director
+          results = await searchMoviesOmdb(query, { searchBy: 'director' });
+        }
+      }
+    }
     
-    // If no results with implied intent, try with the original query
+    // If no results with person search or not a person query, try regular search
     if (results.length === 0) {
-      console.log("No results from implied intent, trying with original query...");
       results = await searchMoviesOmdb(query);
     }
-    
-    // If still no results, try with genres and themes
-    if (results.length === 0 && (genres.length > 0 || themes.length > 0)) {
-      const searchTerms = [...genres, ...themes.slice(0, 1)].join(' ');
-      if (searchTerms.length > 2) {
-        console.log(`No results, trying with genres and themes: "${searchTerms}"`);
-        results = await searchMoviesOmdb(searchTerms);
-      }
-    }
-    
-    // If still no results, try with key terms and moods
-    if (results.length === 0 && (keyTerms.length > 0 || moods.length > 0)) {
-      const combinedTerms = [...keyTerms, ...moods].slice(0, 3).join(' ');
-      if (combinedTerms.length > 2) {
-        console.log(`Still no results, trying with key terms and moods: "${combinedTerms}"`);
-        results = await searchMoviesOmdb(combinedTerms);
-      }
-    }
-    
+
     // If we have OMDB results, use them
     if (results.length > 0) {
       console.log(`Found ${results.length} movies via API`);

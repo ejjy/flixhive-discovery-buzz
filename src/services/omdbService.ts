@@ -1,4 +1,3 @@
-
 import { API_CONFIG } from '@/config/api';
 import { Movie } from '@/types/movie';
 import { mockMovies } from './mock/mockData';
@@ -68,13 +67,49 @@ const convertOmdbMovieToMovie = (omdbMovie: any): Movie => {
   };
 };
 
-export const searchMoviesOmdb = async (query: string): Promise<Movie[]> => {
+interface SearchOptions {
+  searchBy?: 'director' | 'actor';
+}
+
+export const searchMoviesOmdb = async (query: string, options: SearchOptions = {}): Promise<Movie[]> => {
   try {
     if (!API_CONFIG.omdb.apiKey) {
       throw new Error('OMDB API key not configured');
     }
 
-    const response = await fetch(`https://www.omdbapi.com/?apikey=${API_CONFIG.omdb.apiKey}&s=${encodeURIComponent(query)}&type=movie`);
+    const searchParams = new URLSearchParams({
+      apikey: API_CONFIG.omdb.apiKey,
+      type: 'movie'
+    });
+
+    // Handle different search types
+    if (options.searchBy === 'director') {
+      // First get list of movies
+      const response = await fetch(`https://www.omdbapi.com/?${searchParams}&s=${encodeURIComponent(query)}`);
+      if (!response.ok) throw new Error(`OMDB API search failed with status: ${response.status}`);
+      
+      const data = await response.json();
+      if (data.Response === 'False') return [];
+
+      // Then filter by director in detailed results
+      const moviePromises = data.Search.slice(0, 5).map(async (result: any) => {
+        const details = await getMovieDetailsOmdb(result.imdbID);
+        if (details?.director?.toLowerCase().includes(query.toLowerCase())) {
+          return details;
+        }
+        return null;
+      });
+      
+      const movies = await Promise.all(moviePromises);
+      return movies.filter((movie): movie is Movie => movie !== null);
+    } else if (options.searchBy === 'actor') {
+      // For actors, we can use the actor parameter directly
+      searchParams.append('s', query);
+    } else {
+      searchParams.append('s', query);
+    }
+
+    const response = await fetch(`https://www.omdbapi.com/?${searchParams}`);
     
     if (!response.ok) {
       throw new Error(`OMDB API search failed with status: ${response.status}`);
@@ -87,9 +122,20 @@ export const searchMoviesOmdb = async (query: string): Promise<Movie[]> => {
       return [];
     }
     
-    // Get detailed info for each search result (up to 5 results to avoid rate limits)
+    // Get detailed info for each search result
     const moviePromises = data.Search.slice(0, 5).map(async (result: any) => {
-      return await getMovieDetailsOmdb(result.imdbID);
+      const details = await getMovieDetailsOmdb(result.imdbID);
+      
+      // For actor search, verify actor is in the cast
+      if (options.searchBy === 'actor' && details) {
+        if (!details.cast?.some(actor => 
+          actor.toLowerCase().includes(query.toLowerCase())
+        )) {
+          return null;
+        }
+      }
+      
+      return details;
     });
     
     const movies = await Promise.all(moviePromises);
@@ -97,14 +143,7 @@ export const searchMoviesOmdb = async (query: string): Promise<Movie[]> => {
     
   } catch (error) {
     console.error('Error searching movies via OMDB:', error);
-    
-    // Fall back to mock data
-    const mockResults = mockMovies.filter(movie => 
-      movie.title.toLowerCase().includes(query.toLowerCase()) ||
-      movie.overview.toLowerCase().includes(query.toLowerCase())
-    );
-    
-    return mockResults.length > 0 ? mockResults : [];
+    return [];
   }
 };
 

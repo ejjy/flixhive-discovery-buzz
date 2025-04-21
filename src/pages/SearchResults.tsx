@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -49,6 +48,13 @@ const SearchResults = () => {
     searchQuery.toLowerCase().includes('feel') ||
     searchQuery.toLowerCase().includes('want');
 
+  // Function to determine if the search is person-related
+  const isPersonSearch = (query: string): boolean => {
+    const personKeywords = ['actor', 'actress', 'director', 'star', 'starring', 'directed by'];
+    return personKeywords.some(keyword => query.toLowerCase().includes(keyword)) ||
+           query.split(' ').length <= 3; // Simple name detection
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -56,20 +62,20 @@ const SearchResults = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="flex items-center gap-3">
-            {isNaturalLanguageQuery ? (
-              <Sparkles className="h-8 w-8 text-amber-500" />
+            {isPersonSearch(searchQuery) ? (
+              <Film className="h-8 w-8 text-amber-500" />
             ) : (
               <Search className="h-8 w-8 text-amber-500" />
             )}
             <h1 className="text-3xl font-bold">
-              {isNaturalLanguageQuery ? 'Movie Suggestions' : 'Search Results'}
+              {isPersonSearch(searchQuery) ? 'Movies Related To' : 'Search Results'}
             </h1>
           </div>
           
           <div className="mt-3 flex items-center">
             <p className="text-gray-400">
-              {isNaturalLanguageQuery 
-                ? `Based on your wish: `
+              {isPersonSearch(searchQuery) 
+                ? `Showing movies related to: `
                 : `Results for: `}
             </p>
             <Badge variant="outline" className="ml-2 bg-amber-500/10 text-amber-500 border-amber-500/20 px-3 py-1">
