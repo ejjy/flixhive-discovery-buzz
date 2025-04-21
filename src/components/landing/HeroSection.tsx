@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Film, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -23,7 +24,7 @@ export const HeroSection = () => {
           </div>
           <Input
             type="text"
-            placeholder="Search a movie or describe what do you wanna watch"
+            placeholder="Describe what you want to watch"
             className="w-full pl-12 h-14 border-2 bg-indigo-950/40 border-amber-400/30 text-white placeholder:text-amber-100/70 focus:border-amber-400 focus:ring-amber-400/30 transition-colors"
           />
         </div>
