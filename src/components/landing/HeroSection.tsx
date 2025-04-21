@@ -17,7 +17,7 @@ export const HeroSection = () => {
           Find out what to watch, with the best reviews and ratings
         </h2>
 
-        <div className="relative z-10 max-w-md mx-auto md:mx-0">
+        <div className="relative z-10 w-full max-w-xl mx-auto md:mx-0">
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
             <Search className="text-amber-400 w-6 h-6" />
           </div>
