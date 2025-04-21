@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Film, Search } from 'lucide-react';
+import { Film, Search, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -41,6 +41,13 @@ export const HeroSection = () => {
         <h2 className="text-xl md:text-2xl text-white/90 mb-6 max-w-2xl relative z-10 text-center md:text-left">
           Find out what to watch, with the best reviews and ratings
         </h2>
+
+        <div className="mb-4 p-3 rounded-lg bg-indigo-900/30 border border-indigo-700/30 flex items-center">
+          <Sparkles className="h-5 w-5 text-amber-400 mr-3 flex-shrink-0" />
+          <p className="text-amber-100 text-sm">
+            Try asking in natural language, like "a feel-good comedy for family night" or "something with aliens and time travel"
+          </p>
+        </div>
 
         <form onSubmit={handleSearch} className="relative z-10 w-full max-w-xl mx-auto md:mx-0 space-y-4">
           <div className="relative">

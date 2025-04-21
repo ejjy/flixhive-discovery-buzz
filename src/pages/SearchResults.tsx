@@ -6,9 +6,10 @@ import Navbar from '@/components/navbar';
 import MovieCard from '@/components/MovieCard';
 import { searchMovies } from '@/services/movieService';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, AlertCircle } from 'lucide-react';
+import { Search, AlertCircle, Film, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 const SearchResults = () => {
   const location = useLocation();
@@ -43,7 +44,10 @@ const SearchResults = () => {
   const isNaturalLanguageQuery = searchQuery.split(' ').length > 2 || 
     searchQuery.toLowerCase().includes('movie') ||
     searchQuery.toLowerCase().includes('about') ||
-    searchQuery.toLowerCase().includes('with');
+    searchQuery.toLowerCase().includes('with') ||
+    searchQuery.toLowerCase().includes('like') ||
+    searchQuery.toLowerCase().includes('feel') ||
+    searchQuery.toLowerCase().includes('want');
 
   return (
     <div className="min-h-screen bg-background">
@@ -51,30 +55,73 @@ const SearchResults = () => {
       
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">
-            {isNaturalLanguageQuery ? 'Movie Suggestions' : 'Search Results'}
-          </h1>
-          <p className="text-gray-400">
-            {isNaturalLanguageQuery 
-              ? `Based on your description: `
-              : `Results for: `}
-            <span className="text-white font-medium">"{searchQuery}"</span>
-          </p>
+          <div className="flex items-center gap-3">
+            {isNaturalLanguageQuery ? (
+              <Sparkles className="h-8 w-8 text-amber-500" />
+            ) : (
+              <Search className="h-8 w-8 text-amber-500" />
+            )}
+            <h1 className="text-3xl font-bold">
+              {isNaturalLanguageQuery ? 'Movie Suggestions' : 'Search Results'}
+            </h1>
+          </div>
+          
+          <div className="mt-3 flex items-center">
+            <p className="text-gray-400">
+              {isNaturalLanguageQuery 
+                ? `Based on your wish: `
+                : `Results for: `}
+            </p>
+            <Badge variant="outline" className="ml-2 bg-amber-500/10 text-amber-500 border-amber-500/20 px-3 py-1">
+              <span className="text-white font-medium">"{searchQuery}"</span>
+            </Badge>
+          </div>
           
           {/* Quick search form */}
-          <form onSubmit={handleSearch} className="mt-6 mb-8 flex gap-2">
-            <Input
-              type="text"
-              placeholder="Refine your search..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="flex-1 bg-sky-900/20 border-sky-700/30"
-            />
-            <Button type="submit" className="bg-amber-500 hover:bg-amber-600">
-              <Search className="w-4 h-4 mr-2" />
-              Search
-            </Button>
+          <form onSubmit={handleSearch} className="mt-6 mb-8">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Refine your search or describe what you feel like watching..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="pl-10 py-6 bg-sky-950/20 border-sky-800/30 text-white"
+                />
+              </div>
+              <Button type="submit" className="bg-amber-500 hover:bg-amber-600 text-white px-6">
+                <Film className="w-4 h-4 mr-2" />
+                Find Movies
+              </Button>
+            </div>
           </form>
+          
+          {isNaturalLanguageQuery && !isLoading && results && (
+            <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-indigo-950/40 to-sky-950/40 border border-sky-900/30">
+              <h2 className="text-lg font-medium mb-2 text-amber-400 flex items-center">
+                <Sparkles className="w-4 h-4 mr-2" />
+                We analyzed your search
+              </h2>
+              <p className="text-gray-300 mb-3">Our AI found movies that match what you're looking for based on:</p>
+              <div className="flex flex-wrap gap-2">
+                {results && results[0]?.genres.map((genre, index) => (
+                  <Badge key={index} variant="secondary" className="bg-amber-900/30 text-amber-300 border-amber-800/50">
+                    {genre}
+                  </Badge>
+                ))}
+                {searchQuery.split(' ')
+                  .filter(word => word.length > 3 && !['movie', 'about', 'with', 'like', 'want', 'something'].includes(word.toLowerCase()))
+                  .slice(0, 3)
+                  .map((keyword, index) => (
+                    <Badge key={`kw-${index}`} variant="outline" className="bg-sky-900/20 text-sky-300 border-sky-800/40">
+                      {keyword}
+                    </Badge>
+                  ))
+                }
+              </div>
+            </div>
+          )}
         </div>
         
         {isLoading ? (
