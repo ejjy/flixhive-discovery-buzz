@@ -5,17 +5,15 @@ This directory contains tests for the search functionality modules.
 
 ## Running Tests
 
-Since we cannot modify package.json to add testing scripts, you can run these tests manually:
+Since we cannot install Vitest as a dependency, we'll use a simpler approach to testing. The `runTests.ts` file contains basic validation tests that can be run using the TypeScript compiler:
 
-1. Install Vitest globally:
-   ```
-   npm install -g vitest
-   ```
+```bash
+# First compile the tests
+npx tsc src/services/search/__tests__/runTests.ts --esModuleInterop --module commonjs
 
-2. Run the tests from the project root:
-   ```
-   npx vitest run src/services/search/__tests__/runTests.ts
-   ```
+# Then run the compiled JavaScript
+node src/services/search/__tests__/runTests.js
+```
 
 ## Test Coverage
 
@@ -28,4 +26,4 @@ These tests cover the core functionality of the search modules:
 
 ## Adding More Tests
 
-When adding new tests, simply create additional test files in this directory with names like `moduleName.test.ts`.
+When adding new tests, simply extend the runTests.ts file with additional test cases.

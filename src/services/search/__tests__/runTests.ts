@@ -1,10 +1,56 @@
 
-import { describe, it, expect } from 'vitest';
 import { SearchAnalysis } from '../types';
 import { processNaturalLanguageQuery } from '../queryProcessor';
 import { scoreMovie } from '../movieScoring';
 import { generateMovie } from '../movieGenerator';
 import { Movie } from '@/types/movie';
+
+// Simple test runner
+const describe = (name: string, fn: () => void) => {
+  console.log(`\n🧪 ${name}`);
+  fn();
+};
+
+const it = (name: string, fn: () => void) => {
+  try {
+    fn();
+    console.log(`  ✅ ${name}`);
+  } catch (error) {
+    console.error(`  ❌ ${name}`);
+    console.error(`    ${error}`);
+  }
+};
+
+const expect = (actual: any) => ({
+  toBe: (expected: any) => {
+    if (actual !== expected) {
+      throw new Error(`Expected ${expected} but got ${actual}`);
+    }
+  },
+  toBeGreaterThan: (expected: any) => {
+    if (!(actual > expected)) {
+      throw new Error(`Expected ${actual} to be greater than ${expected}`);
+    }
+  },
+  toContain: (expected: any) => {
+    if (Array.isArray(actual)) {
+      if (!actual.includes(expected)) {
+        throw new Error(`Expected array to contain ${expected}`);
+      }
+    } else if (typeof actual === 'string') {
+      if (!actual.includes(expected)) {
+        throw new Error(`Expected string to contain ${expected}`);
+      }
+    } else {
+      throw new Error('toContain can only be used with arrays or strings');
+    }
+  },
+  toBeInstanceOf: (expected: any) => {
+    if (!(actual instanceof expected)) {
+      throw new Error(`Expected instance of ${expected.name}`);
+    }
+  }
+});
 
 // Mock movie for testing
 const mockMovie: Movie = {
@@ -47,9 +93,8 @@ describe('SearchAnalysis Type', () => {
     expect(analysis.moods).toBeInstanceOf(Array);
     expect(analysis.themes).toBeInstanceOf(Array);
     expect(typeof analysis.impliedIntent).toBe("string");
+    // We can't use the exact same approach as before with the enum check
     expect(["actor", "director", "celebrity", undefined].includes(analysis.personType as any)).toBe(true);
-    
-    console.log("✓ SearchAnalysis type test passed");
   });
 });
 
@@ -62,8 +107,6 @@ describe('processNaturalLanguageQuery', () => {
     expect(result.genres).toContain("comedy");
     expect(result.eras).toContain("90s");
     expect(result.moods).toContain("funny");
-    
-    console.log("✓ processNaturalLanguageQuery simple query test passed");
   });
   
   it('should identify a person query', () => {
@@ -73,8 +116,6 @@ describe('processNaturalLanguageQuery', () => {
     expect(result.personType).toBe("actor");
     expect(result.keyTerms).toContain("tom");
     expect(result.keyTerms).toContain("hanks");
-    
-    console.log("✓ processNaturalLanguageQuery person query test passed");
   });
 });
 
@@ -104,8 +145,6 @@ describe('scoreMovie', () => {
     const lowScore = scoreMovie(lowMatchMovie, query, analysis);
     
     expect(score).toBeGreaterThan(lowScore);
-    
-    console.log("✓ scoreMovie test passed");
   });
 });
 
@@ -125,12 +164,12 @@ describe('generateMovie', () => {
     const generatedMovie = generateMovie(query, analysis);
     
     expect(generatedMovie.id).toBeGreaterThan(1000); // Generated movie IDs start at 1000
-    expect(generatedMovie.title).toBeTruthy();
+    expect(typeof generatedMovie.title).toBe("string");
+    expect(generatedMovie.title.length).toBeGreaterThan(0);
     expect(generatedMovie.overview).toContain("robots");
     expect(generatedMovie.genres).toContain("Science Fiction");
-    
-    console.log("✓ generateMovie test passed");
   });
 });
 
+// Run all tests
 console.log("All tests completed!");
