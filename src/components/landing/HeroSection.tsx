@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Film } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 export const HeroSection = () => {
   return (
@@ -16,7 +17,16 @@ export const HeroSection = () => {
         <h2 className="text-xl md:text-2xl text-white/90 mb-6 max-w-2xl relative z-10 text-center md:text-left">
           Find out what to watch, with the best reviews and ratings
         </h2>
+
+        <div className="relative z-10 max-w-md mx-auto md:mx-0">
+          <Input
+            type="text"
+            placeholder="Search movies or ask anything..."
+            className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-amber-400/50 transition-colors"
+          />
+        </div>
       </div>
     </div>
   );
 };
+
