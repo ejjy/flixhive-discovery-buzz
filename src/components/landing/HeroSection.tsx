@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Film } from 'lucide-react';
+import { Film, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 export const HeroSection = () => {
@@ -19,14 +18,16 @@ export const HeroSection = () => {
         </h2>
 
         <div className="relative z-10 max-w-md mx-auto md:mx-0">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+            <Search className="text-white/50 w-5 h-5" />
+          </div>
           <Input
             type="text"
-            placeholder="Search movies or ask anything..."
-            className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-amber-400/50 transition-colors"
+            placeholder="Search a movie or describe what do you wanna watch"
+            className="w-full pl-10 bg-soft-purple/20 border-purple-300/30 text-white placeholder:text-white/60 focus:border-amber-400/50 transition-colors"
           />
         </div>
       </div>
     </div>
   );
 };
-
