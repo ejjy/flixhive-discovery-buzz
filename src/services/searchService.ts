@@ -97,9 +97,6 @@ const processNaturalLanguageQuery = (query: string): {
     }
   }
   
-  // Process the query
-  const lowerQuery = query.toLowerCase();
-  
   // Extract mentioned genres
   const mentionedGenres = genreKeywords.filter(genre => 
     lowerQuery.includes(genre)
