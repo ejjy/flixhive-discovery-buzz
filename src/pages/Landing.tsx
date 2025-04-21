@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Film, Tv, Star, Clapperboard, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +20,8 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
+import { SearchSection } from '@/components/SearchSection';
+import { AIReviewSection } from '@/components/AIReviewSection';
 
 const Landing = () => {
   const { isSignedIn, signIn, signUp, signInWithGoogle } = useAuth();
@@ -28,10 +29,21 @@ const Landing = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [searchedMovie, setSearchedMovie] = useState<Movie | null>(null);
+  const navigate = useNavigate();
 
   if (isSignedIn) {
     return <Navigate to="/home" replace />;
   }
+
+  const handleMovieSearch = async (movie: Movie) => {
+    setSearchedMovie(movie);
+    // Scroll to review section smoothly
+    const reviewSection = document.getElementById('review-section');
+    if (reviewSection) {
+      reviewSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -315,6 +327,26 @@ const Landing = () => {
             </Card>
           </div>
         </div>
+        
+        {/* Add Search Section */}
+        <div className="w-full max-w-2xl mx-auto mt-8 mb-12">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              Get AI-Powered Movie Reviews
+            </h2>
+            <p className="text-white/80">
+              Search for any movie to get instant, in-depth AI analysis and reviews
+            </p>
+          </div>
+          <SearchSection onMovieFound={handleMovieSearch} />
+        </div>
+        
+        {/* AI Review Section */}
+        {searchedMovie && (
+          <div id="review-section" className="w-full max-w-4xl mx-auto mt-8 px-4">
+            <AIReviewSection movie={searchedMovie} />
+          </div>
+        )}
       </div>
       
       {/* Features Section */}
