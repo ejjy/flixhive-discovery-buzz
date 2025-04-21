@@ -1,8 +1,31 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Film, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 export const HeroSection = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!searchQuery.trim()) return;
+
+    // Show loading toast
+    toast({
+      title: "Searching...",
+      description: "Looking for movies matching your description",
+      duration: 2000,
+    });
+
+    // Navigate to search results page with the query
+    navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl w-full">
       <div className="flex flex-col justify-center">
@@ -17,16 +40,18 @@ export const HeroSection = () => {
           Find out what to watch, with the best reviews and ratings
         </h2>
 
-        <div className="relative z-10 w-full max-w-xl mx-auto md:mx-0">
+        <form onSubmit={handleSearch} className="relative z-10 w-full max-w-xl mx-auto md:mx-0">
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
             <Search className="text-amber-400 w-6 h-6" />
           </div>
           <Input
             type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Say what you want to watch!"
             className="w-full pl-12 h-14 border-2 bg-indigo-950/40 border-amber-400/30 text-white placeholder:text-amber-100/70 focus:border-amber-400 focus:ring-amber-400/30 transition-colors"
           />
-        </div>
+        </form>
       </div>
     </div>
   );
