@@ -133,7 +133,9 @@ const SearchResults = () => {
         ) : results && results.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
             {results.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
+              <div key={movie.id} onClick={() => navigate(`/movie/${movie.id}`)}>
+                <MovieCard movie={movie} />
+              </div>
             ))}
           </div>
         ) : (
