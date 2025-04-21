@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Film, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
@@ -40,19 +41,30 @@ export const HeroSection = () => {
           Find out what to watch, with the best reviews and ratings
         </h2>
 
-        <form onSubmit={handleSearch} className="relative z-10 w-full max-w-xl mx-auto md:mx-0">
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-            <Search className="text-amber-400 w-6 h-6" />
+        <form onSubmit={handleSearch} className="relative z-10 w-full max-w-xl mx-auto md:mx-0 space-y-4">
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+              <Search className="text-amber-400 w-6 h-6" />
+            </div>
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Say what you want to watch!"
+              className="w-full pl-12 h-20 text-lg border-2 bg-indigo-950/40 border-amber-400/30 text-white placeholder:text-amber-100/70 focus:border-amber-400 focus:ring-amber-400/30 transition-colors"
+            />
           </div>
-          <Input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Say what you want to watch!"
-            className="w-full pl-12 h-14 border-2 bg-indigo-950/40 border-amber-400/30 text-white placeholder:text-amber-100/70 focus:border-amber-400 focus:ring-amber-400/30 transition-colors"
-          />
+          
+          <Button 
+            type="submit"
+            className="w-full h-12 text-lg bg-amber-500 hover:bg-amber-600 text-white font-medium"
+          >
+            <Search className="w-5 h-5 mr-2" />
+            Find my wish
+          </Button>
         </form>
       </div>
     </div>
   );
 };
+
